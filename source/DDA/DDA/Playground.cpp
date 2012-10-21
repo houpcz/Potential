@@ -1,5 +1,6 @@
 #include <QHBoxLayout>
 #include <QColor>
+#include <math.h>
 #include "Playground.h"
 
 Playground::Playground(QWidget *parent)
@@ -15,22 +16,24 @@ Playground::Playground(QWidget *parent)
 
 	timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(Tick()));
-    timer->start(10);
+    timer->start(0);
 
 	time.start();
 
-	potentialField = new float*[Agent::FIELD_WIDTH];
-	for(int loop1 = 0; loop1 < Agent::FIELD_WIDTH; loop1++)
-		potentialField[loop1] = new float[Agent::FIELD_WIDTH];
+	potentialField = new float*[PotentialField::FIELD_WIDTH];
+	for(int loop1 = 0; loop1 < PotentialField::FIELD_WIDTH; loop1++)
+		potentialField[loop1] = new float[PotentialField::FIELD_WIDTH];
 }
 
 Playground::~Playground(void)
 {
 	delete timer;
 
-	for(int loop1 = 0; loop1 < Agent::FIELD_WIDTH; loop1++)
+	for(int loop1 = 0; loop1 < PotentialField::FIELD_WIDTH; loop1++)
 		delete [] potentialField[loop1];
 	delete [] potentialField;
+
+	ClearEnvironment();
 }
 
 void Playground::Tick()
@@ -51,8 +54,11 @@ void Playground::ClearEnvironment()
 	{
 		scene.removeItem(agent[loop1]);
 		delete agent[loop1];
+		scene.removeItem(field[loop1]);
+		delete field[loop1];
 	}
 	agent.clear();
+	field.clear();
 
 	for(int loop1 = 0; loop1 < obstacle.size(); loop1++)
 	{
@@ -64,25 +70,41 @@ void Playground::ClearEnvironment()
 
 void Playground::CountPotentialField(int agentID)
 {
-	fieldCenterX = agent[agentID]->rect().x();
-	fieldCenterY = agent[agentID]->rect().y();
+	fieldCenterX = agent[agentID]->rect().x() + agent[agentID]->pos().x() + agent[agentID]->rect().width()/2;
+	fieldCenterY = agent[agentID]->rect().y() + agent[agentID]->pos().y() + agent[agentID]->rect().height()/2;
 
 	int x, y;
-	for(int loop1 = 0; loop1 < Agent::FIELD_WIDTH; loop1++)
+	int goalX = agent[agentID]->GoalX();
+	int goalY = agent[agentID]->GoalY();
+	for(int loop1 = 0; loop1 < PotentialField::FIELD_WIDTH; loop1++)
 	{
-		for(int loop2 = 0; loop2 < Agent::FIELD_WIDTH; loop2++)
+		for(int loop2 = 0; loop2 < PotentialField::FIELD_WIDTH; loop2++)
 		{
-			x = (int) fieldCenterX + (loop2 - (Agent::FIELD_WIDTH / 2)) * Agent::TILE_WIDTH;
-			y = (int) fieldCenterY + (loop1 - (Agent::FIELD_WIDTH / 2)) * Agent::TILE_WIDTH;
-			potentialField[loop1][loop2] = CountPotentialFieldTile(agentID, x, y);
+			x = (int) fieldCenterX + (loop2 - (PotentialField::FIELD_WIDTH / 2)) * PotentialField::TILE_WIDTH;
+			y = (int) fieldCenterY + (loop1 - (PotentialField::FIELD_WIDTH / 2)) * PotentialField::TILE_WIDTH;
+			potentialField[loop1][loop2] = CountPotentialFieldTile(agentID, x, y, goalX, goalY);
 		}
 	}
-	agent[agentID]->SetPotentialField(potentialField, fieldCenterX, fieldCenterY);
+	field[agentID]->SetPotentialField(potentialField, fieldCenterX, fieldCenterY);
 }
 
-float Playground::CountPotentialFieldTile(int agentID, int x, int y)
+float Playground::CountPotentialFieldTile(int agentID, int x, int y, int goalX, int goalY)
 {
-	return 1;
+	float dx = x - goalX;
+	float dy = y - goalY;
+	float initValue = sqrt(dx * dx + dy * dy);
+
+	bool inTriangle = false;
+	for(int loop1 = 0; loop1 < obstacle.size(); loop1++)
+	{
+		if(obstacle[loop1]->polygon().containsPoint(QPointF(x, y), Qt::FillRule::WindingFill))
+		{
+			inTriangle = true;
+			break;
+		}
+	}
+	float obst = inTriangle ? 100 : 0;
+	return initValue + obst;
 }
 
 void Playground::SetEnvironment()
@@ -126,6 +148,7 @@ void Playground::SetEnvironment()
 	}
 
 	Agent * tempAgent;
+	PotentialField * tempField;
 	int agentX, agentY;
 	int agentWidth = 8;
 	for(int loop1 = 0; loop1 < numberAgents; loop1++)
@@ -144,8 +167,12 @@ void Playground::SetEnvironment()
 
 		tempAgent = new Agent(agentX, agentY, agentWidth, agentWidth, 0);
 		tempAgent->SetGoal(500 - agentX, 500 - agentY);
+		tempField = new PotentialField(agentX, agentY, 0);
+
 		agent.push_back(tempAgent);
 		scene.addItem(tempAgent);
+		field.push_back(tempField);
+		scene.addItem(tempField);
 	}
 
 }

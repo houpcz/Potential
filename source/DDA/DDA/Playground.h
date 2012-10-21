@@ -9,6 +9,7 @@
 
 #include "Agent.h"
 #include "Obstacle.h"
+#include "PotentialField.h"
 
 using namespace std;
 
@@ -26,6 +27,7 @@ private :
 	int numberObstacles;
 	vector<Agent *> agent;
 	vector<Obstacle *> obstacle;
+	vector<PotentialField *> field;
 	QTime time;
 
 	qreal fieldCenterX;
@@ -37,7 +39,7 @@ public:
 	void SetEnvironment();
 	void ClearEnvironment();
 	void CountPotentialField(int agentID);
-	float CountPotentialFieldTile(int agentID, int x, int y);
+	float CountPotentialFieldTile(int agentID, int x, int y, int goalX, int goalY);
 public slots:
 	void Tick();
 };
