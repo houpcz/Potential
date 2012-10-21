@@ -6,7 +6,7 @@
 Playground::Playground(QWidget *parent)
      : QWidget(parent)
 {
-	numberAgents = 1;
+	numberAgents = 10;
 	numberObstacles = 50;
 	SetEnvironment();
 	QGraphicsView * view = new QGraphicsView(&scene);

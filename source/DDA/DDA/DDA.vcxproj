@@ -94,6 +94,7 @@
     <ClCompile Include="MainWindow.cpp" />
     <ClCompile Include="Obstacle.cpp" />
     <ClCompile Include="Playground.cpp" />
+    <ClCompile Include="Point2D.cpp" />
     <ClCompile Include="PotentialField.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -123,6 +124,7 @@
   <ItemGroup>
     <ClInclude Include="Agent.h" />
     <ClInclude Include="Obstacle.h" />
+    <ClInclude Include="Point2D.h" />
     <ClInclude Include="PotentialField.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

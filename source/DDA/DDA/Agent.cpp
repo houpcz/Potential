@@ -2,18 +2,23 @@
 #include <QBrush>
 #include <QPainter>
 
-Agent::Agent(qreal x, qreal y, qreal width, qreal height, QGraphicsItem * parent) : QGraphicsEllipseItem (x, y, width, height, parent)
+Agent::Agent(qreal x, qreal y, qreal width, qreal height, QGraphicsItem * parent) : realPos(x, y), velocity(0, 0), QGraphicsEllipseItem (x, y, width, height, parent)
 {
 	QBrush brush;
 	brush.setColor(QColor(255, 0, 0));
 	brush.setStyle(Qt::BrushStyle::SolidPattern);
 	setBrush(brush);
-	
-	vY = 15;
-	vX = 0;
+
 	this->setZValue(10);
 }
 
+void Agent::SetGoal(int _goalX, int _goalY) 
+{ 
+	goalX = _goalX; 
+	goalY = _goalY; 
+
+	path.push(Point2D(goalX, goalY));
+}
 
 Agent::~Agent(void)
 {
@@ -21,8 +26,24 @@ Agent::~Agent(void)
 
 void Agent::Tick(int millis)
 {
-	setX(x() + vX * millis / 1000.0);
-	setY(y() + vY * millis / 1000.0);
+	setX(x() + velocity.X() * millis / 1000.0);
+	setY(y() + velocity.Y() * millis / 1000.0);
+
+	realPos.Set(x() + rect().x(), y() + rect().y());
+
+	if(!path.empty())
+	{
+		Point2D waypoint = path.front();
+		if(realPos.Distance(waypoint) < 10)
+		{
+			path.pop();
+		} else {
+			velocity.Set(waypoint.X() - realPos.X(), waypoint.Y() - realPos.Y());
+			velocity.SetLength(25.0f);
+		}
+	} else {
+		velocity.SetLength(0.0f);
+	}
 }
 
 void Agent::paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget)
