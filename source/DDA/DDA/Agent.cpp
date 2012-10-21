@@ -34,7 +34,7 @@ void Agent::Tick(int millis)
 	if(!path.empty())
 	{
 		Point2D waypoint = path.front();
-		if(realPos.Distance(waypoint) < 1 || realPos.Distance(Point2D(goalX, goalY)) < 8 )
+		if(realPos.Distance(waypoint) < 1 || realPos.Distance(Point2D(goalX, goalY)) < 3 )
 		{
 			path.pop();
 		} else {
@@ -58,7 +58,7 @@ void Agent::paint( QPainter * painter, const QStyleOptionGraphicsItem * option, 
 
 void Agent::SetPath(queue<Point2D> * _path)
 {
-	if(realPos.Distance(Point2D(goalX, goalY)) < 8)
+	if(realPos.Distance(Point2D(goalX, goalY)) < 3)
 		return;
 
 	while(!path.empty())

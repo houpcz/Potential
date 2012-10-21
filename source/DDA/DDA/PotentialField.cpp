@@ -131,6 +131,34 @@ void PotentialField::FindPath()
 			minY = lastMinY;
 			minCenter = potentialField[lastMinY][lastMinX + 1];
 		}
+		if(lastMinY > 0 && lastMinX > 0 && potentialField[lastMinY - 1][lastMinX - 1] < minCenter) 
+		{
+			isNewOptimum = true;
+			minX = lastMinX - 1;
+			minY = lastMinY - 1;
+			minCenter = potentialField[lastMinY - 1][lastMinX - 1];
+		}
+		if(lastMinY < FIELD_WIDTH - 1 && lastMinX < FIELD_WIDTH - 1 && potentialField[lastMinY + 1][lastMinX + 1] < minCenter) 
+		{
+			isNewOptimum = true;
+			minX = lastMinX + 1;
+			minY = lastMinY + 1;
+			minCenter = potentialField[lastMinY + 1][lastMinX + 1];
+		}
+		if(lastMinX > 0 && lastMinY < FIELD_WIDTH - 1 && potentialField[lastMinY + 1][lastMinX - 1] < minCenter) 
+		{
+			isNewOptimum = true;
+			minX = lastMinX - 1;
+			minY = lastMinY + 1;
+			minCenter = potentialField[lastMinY + 1][lastMinX - 1];
+		}
+		if(lastMinX < FIELD_WIDTH - 1 && lastMinY > 0 && potentialField[lastMinY - 1][lastMinX + 1] < minCenter) 
+		{
+			isNewOptimum = true;
+			minX = lastMinX + 1;
+			minY = lastMinY - 1;
+			minCenter = potentialField[lastMinY - 1][lastMinX + 1];
+		}
 	}while(isNewOptimum);
 
 	agent->SetPath(&path);
