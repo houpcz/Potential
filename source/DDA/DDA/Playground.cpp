@@ -106,8 +106,23 @@ float Playground::CountPotentialFieldTile(int agentID, int x, int y, int goalX, 
 			break;
 		}
 	}
-	float obst = inTriangle ? 100 : 0;
-	return initValue + obst;
+	float obst = inTriangle ? PotentialField::OBSTACLE : 0;
+
+	bool inAgent = false;
+	for(int loop1 = 0; loop1 < agent.size(); loop1++)
+	{
+		if(loop1 == agentID)
+			continue;
+
+		if(agent[loop1]->RealPos().Distance(Point2D(x, y)) < 7)
+		{
+			inAgent = true;
+			break;
+		}
+	}
+	float ag = inAgent ? PotentialField::OBSTACLE : 0;
+
+	return initValue + obst + ag;
 }
 
 void Playground::SetEnvironment()

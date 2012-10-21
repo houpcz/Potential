@@ -21,5 +21,6 @@ public:
 	void SetGoal(int _goalX, int _goalY);
 	int GoalX() { return goalX; };
 	int GoalY() { return goalY; };
+	Point2D RealPos() { return realPos; };
 };
 

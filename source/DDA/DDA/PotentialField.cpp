@@ -28,7 +28,9 @@ void PotentialField::paint( QPainter * painter, const QStyleOptionGraphicsItem *
 		{
 			int tileX = (int) fieldCenterX + loop2 * TILE_WIDTH;
 			int tileY = (int) fieldCenterY + loop1 * TILE_WIDTH;
-			int value = (int) (235 * (potentialField[loop1][loop2] - minValue) / variance) + 20;
+			int value = ((int) (235 * (potentialField[loop1][loop2] - minValue) / variance) + 20);		
+			if(value > 255)
+				value = 255;
 			brush.setColor(QColor(255 - value, 0, 255 - value));
 			painter->setBrush(brush);
 			painter->drawRect(tileX, tileY, TILE_WIDTH, TILE_WIDTH);
@@ -41,7 +43,8 @@ void PotentialField::SetPotentialField(float ** _potentialField, qreal _fieldCen
 	fieldCenterX = _fieldCenterX - (FIELD_WIDTH / 2) * TILE_WIDTH;
 	fieldCenterY = _fieldCenterY - (FIELD_WIDTH / 2) * TILE_WIDTH;
 
-	minValue = maxValue = potentialField[0][0];
+	maxValue = -1;
+	minValue = potentialField[0][0];
 	for(int loop1 = 0; loop1 < FIELD_WIDTH; loop1++)
 	{
 		for(int loop2 = 0; loop2 < FIELD_WIDTH; loop2++)
@@ -49,7 +52,7 @@ void PotentialField::SetPotentialField(float ** _potentialField, qreal _fieldCen
 			potentialField[loop1][loop2] = _potentialField[loop1][loop2];
 			if(potentialField[loop1][loop2] < minValue)
 				minValue = potentialField[loop1][loop2];
-			else if(potentialField[loop1][loop2] > maxValue)
+			else if(potentialField[loop1][loop2] > maxValue && potentialField[loop1][loop2] < OBSTACLE - 1.0f)
 				maxValue= potentialField[loop1][loop2];
 		}
 	}
