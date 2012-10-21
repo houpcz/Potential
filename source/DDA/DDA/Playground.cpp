@@ -6,8 +6,8 @@
 Playground::Playground(QWidget *parent)
      : QWidget(parent)
 {
-	numberAgents = 10;
-	numberObstacles = 50;
+	numberAgents = 100;
+	numberObstacles = 0;
 	SetEnvironment();
 	QGraphicsView * view = new QGraphicsView(&scene);
 	QHBoxLayout * layout = new QHBoxLayout();
@@ -23,6 +23,8 @@ Playground::Playground(QWidget *parent)
 	potentialField = new float*[PotentialField::FIELD_WIDTH];
 	for(int loop1 = 0; loop1 < PotentialField::FIELD_WIDTH; loop1++)
 		potentialField[loop1] = new float[PotentialField::FIELD_WIDTH];
+
+	lastAgentFieldID = 0;
 }
 
 Playground::~Playground(void)
@@ -43,9 +45,14 @@ void Playground::Tick()
 
 	for(int loop1 = 0; loop1 < agent.size(); loop1++)
 	{
-		CountPotentialField(loop1);
+		if(loop1 == lastAgentFieldID)
+			CountPotentialField(loop1);
+
 		agent[loop1]->Tick(tickMillis);
 	}
+	++lastAgentFieldID;
+	lastAgentFieldID = lastAgentFieldID % agent.size();
+
 }
 
 void Playground::ClearEnvironment()
@@ -130,7 +137,7 @@ void Playground::SetEnvironment()
 	ClearEnvironment();
 
 	srand(120);
-
+	//srand(121);
 	Obstacle * tempObstacle;
 	QPolygonF polygon;
 	int centerX, centerY;
@@ -175,20 +182,21 @@ void Playground::SetEnvironment()
 	{
 		bool cond = false;
 		do {
-			agentX = koef * (rand() % 19 * 50 + rand() % 50);
-			agentY = koef * (rand() % 19 * 50 + rand() % 50);
+			agentX = koef * (rand() % 80 * 12 + rand() % 7);
+			agentY = koef * (rand() % 80 * 12 + rand() % 7);
 
-			cond = scene.itemAt(agentX, agentY) != NULL ||
+			cond = scene.itemAt(agentX, agentY) != NULL;/* ||
 				        scene.itemAt(agentX + agentWidth, agentY) != NULL ||
 						scene.itemAt(agentX, agentY + agentWidth) != NULL ||
 						scene.itemAt(agentX - agentWidth, agentY) != NULL ||
-						scene.itemAt(agentX, agentY - agentWidth) != NULL;
+						scene.itemAt(agentX, agentY - agentWidth) != NULL;*/
+			cond = false;
 		} while(cond);
 
 		tempAgent = new Agent(agentX, agentY, agentWidth, agentWidth, 0);
 		tempAgent->SetGoal(500 - agentX, 500 - agentY);
 		tempGoal = new GoalPoint(500 - agentX, 500 - agentY, 10, 10, 0);
-		tempField = new PotentialField(agentX, agentY, 0);
+		tempField = new PotentialField(tempAgent, agentX, agentY, 0);
 
 		agent.push_back(tempAgent);
 		scene.addItem(tempAgent);

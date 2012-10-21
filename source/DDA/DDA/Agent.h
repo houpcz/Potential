@@ -22,5 +22,6 @@ public:
 	int GoalX() { return goalX; };
 	int GoalY() { return goalY; };
 	Point2D RealPos() { return realPos; };
+	void SetPath(queue<Point2D> * _path);
 };
 

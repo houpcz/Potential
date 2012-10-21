@@ -35,6 +35,8 @@ private :
 	qreal fieldCenterX;
 	qreal fieldCenterY;
 	float ** potentialField;
+
+	int lastAgentFieldID;
 public:
 	Playground(QWidget *parent = 0);
 	~Playground(void);

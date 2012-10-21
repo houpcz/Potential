@@ -34,7 +34,7 @@ void Agent::Tick(int millis)
 	if(!path.empty())
 	{
 		Point2D waypoint = path.front();
-		if(realPos.Distance(waypoint) < 10)
+		if(realPos.Distance(waypoint) < 1 || realPos.Distance(Point2D(goalX, goalY)) < 8 )
 		{
 			path.pop();
 		} else {
@@ -54,4 +54,19 @@ void Agent::paint( QPainter * painter, const QStyleOptionGraphicsItem * option, 
 	painter->setBrush(brush);
 
 	QGraphicsEllipseItem::paint(painter, option, widget);
+}
+
+void Agent::SetPath(queue<Point2D> * _path)
+{
+	if(realPos.Distance(Point2D(goalX, goalY)) < 8)
+		return;
+
+	while(!path.empty())
+		path.pop();
+
+	while(!_path->empty())
+	{
+		path.push(_path->front());
+		_path->pop();
+	}
 }
