@@ -10,6 +10,7 @@
 #include "Agent.h"
 #include "Obstacle.h"
 #include "PotentialField.h"
+#include "GoalPoint.h"
 
 using namespace std;
 
@@ -28,6 +29,7 @@ private :
 	vector<Agent *> agent;
 	vector<Obstacle *> obstacle;
 	vector<PotentialField *> field;
+	vector<GoalPoint *> goalPoint;
 	QTime time;
 
 	qreal fieldCenterX;

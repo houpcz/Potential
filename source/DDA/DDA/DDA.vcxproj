@@ -90,6 +90,7 @@
     <ClCompile Include="GeneratedFiles\Release\moc_Playground.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="GoalPoint.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MainWindow.cpp" />
     <ClCompile Include="Obstacle.cpp" />
@@ -123,6 +124,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Agent.h" />
+    <ClInclude Include="GoalPoint.h" />
     <ClInclude Include="Obstacle.h" />
     <ClInclude Include="Point2D.h" />
     <ClInclude Include="PotentialField.h" />

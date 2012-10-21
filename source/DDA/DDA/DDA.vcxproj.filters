@@ -64,6 +64,9 @@
     <ClCompile Include="Point2D.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="GoalPoint.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="MainWindow.h">
@@ -84,6 +87,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Point2D.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GoalPoint.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

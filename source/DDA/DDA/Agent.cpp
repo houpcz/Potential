@@ -52,7 +52,6 @@ void Agent::paint( QPainter * painter, const QStyleOptionGraphicsItem * option, 
 	brush.setColor(QColor(200, 200, 250));
 	brush.setStyle(Qt::BrushStyle::SolidPattern);
 	painter->setBrush(brush);
-	painter->drawEllipse(goalX, goalY, 10, 10);
 
 	QGraphicsEllipseItem::paint(painter, option, widget);
 }

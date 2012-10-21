@@ -56,7 +56,10 @@ void Playground::ClearEnvironment()
 		delete agent[loop1];
 		scene.removeItem(field[loop1]);
 		delete field[loop1];
+		scene.removeItem(goalPoint[loop1]);
+		delete goalPoint[loop1];
 	}
+	goalPoint.clear();
 	agent.clear();
 	field.clear();
 
@@ -149,6 +152,8 @@ void Playground::SetEnvironment()
 
 	Agent * tempAgent;
 	PotentialField * tempField;
+	GoalPoint * tempGoal;
+
 	int agentX, agentY;
 	int agentWidth = 8;
 	for(int loop1 = 0; loop1 < numberAgents; loop1++)
@@ -167,12 +172,15 @@ void Playground::SetEnvironment()
 
 		tempAgent = new Agent(agentX, agentY, agentWidth, agentWidth, 0);
 		tempAgent->SetGoal(500 - agentX, 500 - agentY);
+		tempGoal = new GoalPoint(500 - agentX, 500 - agentY, 10, 10, 0);
 		tempField = new PotentialField(agentX, agentY, 0);
 
 		agent.push_back(tempAgent);
 		scene.addItem(tempAgent);
 		field.push_back(tempField);
 		scene.addItem(tempField);
+		goalPoint.push_back(tempGoal);
+		scene.addItem(tempGoal);
 	}
 
 }
