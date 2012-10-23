@@ -189,8 +189,8 @@ void Playground::SetEnvironment()
 	{
 		tempObstacle = new Obstacle();
 		polygon.clear();
-		centerX = rand() % 10 * 100;
-		centerY = rand() % 10 * 100;
+		centerX = rand() % 10 * 100 - 25 + rand() % 50;
+		centerY = rand() % 10 * 100 - 25 + rand() % 50;
 		
 		int size = 30;
 		switch(rand() % 3)
