@@ -6,8 +6,8 @@
 Playground::Playground(QWidget *parent)
      : QWidget(parent)
 {
-	numberAgents = 5;
-	numberObstacles = 30;
+	numberAgents = 20;
+	numberObstacles = 100;
 	SetEnvironment();
 	QGraphicsView * view = new QGraphicsView(&scene);
 	QHBoxLayout * layout = new QHBoxLayout();
@@ -23,6 +23,13 @@ Playground::Playground(QWidget *parent)
 	potentialField = new float*[PotentialField::FIELD_WIDTH];
 	for(int loop1 = 0; loop1 < PotentialField::FIELD_WIDTH; loop1++)
 		potentialField[loop1] = new float[PotentialField::FIELD_WIDTH];
+
+	// each agent needs its field 
+	/*
+	for(int loop1 = 0; loop1 < agent.size(); loop1++)
+	{
+		CountPotentialField(loop1);
+	}*/
 
 	lastAgentFieldID = 0;
 }
@@ -82,6 +89,8 @@ void Playground::CountPotentialField(int agentID)
 {
 	fieldCenterX = agent[agentID]->rect().x() + agent[agentID]->pos().x() + agent[agentID]->rect().width()/2;
 	fieldCenterY = agent[agentID]->rect().y() + agent[agentID]->pos().y() + agent[agentID]->rect().height()/2;
+	//fieldCenterX = fieldCenterX - fmod(fieldCenterX, PotentialField::TILE_WIDTH);
+	//fieldCenterY = fieldCenterY - fmod(fieldCenterY, PotentialField::TILE_WIDTH);
 
 	int x, y;
 	int goalX = agent[agentID]->GoalX();
@@ -95,7 +104,41 @@ void Playground::CountPotentialField(int agentID)
 			potentialField[loop1][loop2] = CountPotentialFieldTile(agentID, x, y, goalX, goalY);
 		}
 	}
+	for(int loop1 = 0; loop1 < PotentialField::FIELD_WIDTH; loop1++)
+	{
+		for(int loop2 = 0; loop2 < PotentialField::FIELD_WIDTH; loop2++)
+		{
+			potentialField[loop1][loop2] += CountPotentialFieldTilePostProcess(loop1, loop2);
+		}
+	}
 	field[agentID]->SetPotentialField(potentialField, fieldCenterX, fieldCenterY);
+}
+
+float Playground::CountPotentialFieldTilePostProcess(int row, int col)
+{
+	int n = 0;
+	if(row > 0)
+	{
+		if(potentialField[row - 1][col] > PotentialField::OBSTACLE)
+			++n;
+	}
+	if(col > 0)
+	{
+		if(potentialField[row][col - 1] > PotentialField::OBSTACLE)
+			++n;
+	}
+	if(row < PotentialField::FIELD_WIDTH - 1)
+	{
+		if(potentialField[row + 1][col] > PotentialField::OBSTACLE)
+			++n;
+	}
+	if(col < PotentialField::FIELD_WIDTH - 1)
+	{
+		if(potentialField[row][col + 1] > PotentialField::OBSTACLE)
+			++n;
+	}
+
+	return (n > 0) ? PotentialField::OBSTACLE / 100: 0.0f;
 }
 
 float Playground::CountPotentialFieldTile(int agentID, int x, int y, int goalX, int goalY)
@@ -121,13 +164,13 @@ float Playground::CountPotentialFieldTile(int agentID, int x, int y, int goalX, 
 		if(loop1 == agentID)
 			continue;
 
-		if(agent[loop1]->RealPos().Distance(Point2D(x, y)) < 7)
+		if(agent[loop1]->RealPos().Distance(Point2D(x, y)) < 5)
 		{
 			inAgent = true;
 			break;
 		}
 	}
-	float ag = inAgent ? PotentialField::OBSTACLE : 0;
+	float ag = inAgent ? PotentialField::OBSTACLE / 10 : 0;
 
 	return initValue + obst + ag;
 }
@@ -136,7 +179,7 @@ void Playground::SetEnvironment()
 {
 	ClearEnvironment();
 
-	srand(120);
+	srand(numberAgents * numberObstacles);
 	//srand(121);
 	Obstacle * tempObstacle;
 	QPolygonF polygon;
@@ -146,25 +189,26 @@ void Playground::SetEnvironment()
 	{
 		tempObstacle = new Obstacle();
 		polygon.clear();
-		centerX = rand() % 20 * 50;
-		centerY = rand() % 20 * 50;
+		centerX = rand() % 10 * 100;
+		centerY = rand() % 10 * 100;
 		
+		int size = 30;
 		switch(rand() % 3)
 		{
 			case 0:
-				polygon.push_back(QPointF(koef * (centerX - 50 - rand() % 40), koef * (centerY - 50 - rand() % 30))); 
-				polygon.push_back(QPointF(koef * (centerX + 40 - rand() % 30), koef * (centerY - 50 + rand() % 20))); 
-				polygon.push_back(QPointF(koef * (centerX - 50 - rand() % 30), koef * (centerY + 60 + rand() % 30))); 
+				polygon.push_back(QPointF(koef * (centerX - size), koef * (centerY - size))); 
+				polygon.push_back(QPointF(koef * (centerX + size), koef * (centerY - size))); 
+				polygon.push_back(QPointF(koef * (centerX), koef * (centerY + size))); 
 				break;
 			case 1:
-				polygon.push_back(QPointF(koef * (centerX - 50 + rand() % 40), koef * (centerY + 50 - rand() % 30))); 
-				polygon.push_back(QPointF(koef * (centerX + 40 - rand() % 30), koef * (centerY + 50 + rand() % 20))); 
-				polygon.push_back(QPointF(koef * (centerX - 50 - rand() % 30), koef * (centerY - 60 + rand() % 30))); 
+				polygon.push_back(QPointF(koef * (centerX - size), koef * (centerY - size))); 
+				polygon.push_back(QPointF(koef * (centerX + size), koef * (centerY))); 
+				polygon.push_back(QPointF(koef * (centerX - size), koef * (centerY + size))); 
 				break;
 			case 2:
-				polygon.push_back(QPointF(koef * (centerX - 50 + rand() % 40), koef * (centerY + 50 - rand() % 30))); 
-				polygon.push_back(QPointF(koef * (centerX + 40 + rand() % 30), koef * (centerY - 50 + rand() % 20))); 
-				polygon.push_back(QPointF(koef * (centerX + 50 - rand() % 30), koef * (centerY + 60 - rand() % 30))); 
+				polygon.push_back(QPointF(koef * (centerX - size), koef * (centerY - size))); 
+				polygon.push_back(QPointF(koef * (centerX + size), koef * (centerY - size))); 
+				polygon.push_back(QPointF(koef * (centerX - size), koef * (centerY + size))); 
 				break;
 		}
 		tempObstacle->setPolygon(polygon);
@@ -182,8 +226,10 @@ void Playground::SetEnvironment()
 	{
 		bool cond = false;
 		do {
-			agentX = koef * (rand() % 80 * 12 + rand() % 7);
-			agentY = koef * (rand() % 80 * 12 + rand() % 7);
+			//agentX = koef * (rand() % 80 * 12 + rand() % 7);
+			//agentY = koef * (rand() % 80 * 12 + rand() % 7);
+			agentX = koef * (rand() % 10 * 100 + 40);
+			agentY = koef * (rand() % 10 * 100 - 40);
 
 			cond = scene.itemAt(agentX, agentY) != NULL;/* ||
 				        scene.itemAt(agentX + agentWidth, agentY) != NULL ||

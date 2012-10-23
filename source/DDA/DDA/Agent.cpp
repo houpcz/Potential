@@ -17,7 +17,7 @@ void Agent::SetGoal(int _goalX, int _goalY)
 	goalX = _goalX; 
 	goalY = _goalY; 
 
-	path.push(Point2D(goalX, goalY));
+	//path.push(Point2D(goalX, goalY));
 }
 
 Agent::~Agent(void)
@@ -33,14 +33,21 @@ void Agent::Tick(int millis)
 
 	if(!path.empty())
 	{
-		Point2D waypoint = path.front();
-		if(realPos.Distance(waypoint) < 1 || realPos.Distance(Point2D(goalX, goalY)) < 3 )
-		{
-			path.pop();
-		} else {
-			velocity.Set(waypoint.X() - realPos.X(), waypoint.Y() - realPos.Y());
-			velocity.SetLength(25.0f);
-		}
+		Point2D waypoint(0, 0);
+		
+		bool wasPop;
+		do {
+			wasPop = false;
+			waypoint = path.front();
+			if(realPos.Distance(waypoint) < 2 || realPos.Distance(Point2D(goalX, goalY)) < 4 )
+			{
+				path.pop();
+				wasPop = true;
+			} 
+		}while(wasPop && !path.empty());
+
+		velocity.Set(waypoint.X() - realPos.X(), waypoint.Y() - realPos.Y());
+		velocity.SetLength(25.0f);
 	} else {
 		velocity.SetLength(0.0f);
 	}
@@ -56,9 +63,9 @@ void Agent::paint( QPainter * painter, const QStyleOptionGraphicsItem * option, 
 	QGraphicsEllipseItem::paint(painter, option, widget);
 }
 
-void Agent::SetPath(queue<Point2D> * _path)
+void Agent::SetPath(stack<Point2D> * _path)
 {
-	if(realPos.Distance(Point2D(goalX, goalY)) < 3)
+	if(realPos.Distance(Point2D(goalX, goalY)) < 4)
 		return;
 
 	while(!path.empty())
@@ -66,7 +73,7 @@ void Agent::SetPath(queue<Point2D> * _path)
 
 	while(!_path->empty())
 	{
-		path.push(_path->front());
+		path.push(_path->top());
 		_path->pop();
 	}
 }

@@ -2,6 +2,7 @@
 
 #include <QGraphicsItem>
 #include <queue>
+#include <stack>
 #include "Point2D.h"
 
 using namespace std;
@@ -22,6 +23,6 @@ public:
 	int GoalX() { return goalX; };
 	int GoalY() { return goalY; };
 	Point2D RealPos() { return realPos; };
-	void SetPath(queue<Point2D> * _path);
+	void SetPath(stack<Point2D> * _path);
 };
 

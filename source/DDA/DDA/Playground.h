@@ -44,6 +44,7 @@ public:
 	void ClearEnvironment();
 	void CountPotentialField(int agentID);
 	float CountPotentialFieldTile(int agentID, int x, int y, int goalX, int goalY);
+	float CountPotentialFieldTilePostProcess(int row, int col);
 public slots:
 	void Tick();
 };

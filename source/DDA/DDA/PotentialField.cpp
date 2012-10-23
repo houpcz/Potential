@@ -1,17 +1,28 @@
 #include <QPainter>
+#include <queue>
 #include "PotentialField.h"
+#include "BestFirstSearchNode.h"
 
+using namespace std;
+
+bool operator<(const BestFirstSearchNode & node1, const BestFirstSearchNode & node2)
+{
+	return node1.value > node2.value;
+}
 
 PotentialField::PotentialField(Agent * _agent,  qreal x, qreal y, QGraphicsItem * parent) :  QGraphicsRectItem( x - (FIELD_WIDTH / 2) * TILE_WIDTH, y  - (FIELD_WIDTH / 2) * TILE_WIDTH, TILE_WIDTH * FIELD_WIDTH, TILE_WIDTH * FIELD_WIDTH, parent )
 {
 	agent = _agent;
 	fieldCenterX = 0.0f;
 	fieldCenterY = 0.0f;
+	time = NULL;
 }
 
 
 PotentialField::~PotentialField(void)
 {
+	if(time != NULL)
+		delete time;
 }
 
 void PotentialField::paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget)
@@ -34,7 +45,12 @@ void PotentialField::paint( QPainter * painter, const QStyleOptionGraphicsItem *
 			int value = ((int) (235 * (potentialField[loop1][loop2] - minValue) / variance) + 20);		
 			if(value > 255)
 				value = 255;
-			brush.setColor(QColor(255 - value, 0, 255 - value));
+
+			if(road[loop1][loop2] == ON_ROAD)
+				brush.setColor(QColor(0, 255, 0));
+			else
+				brush.setColor(QColor(255 - value, 0, 255 - value));
+
 			painter->setBrush(brush);
 			painter->drawRect(tileX, tileY, TILE_WIDTH, TILE_WIDTH);
 		}
@@ -43,6 +59,15 @@ void PotentialField::paint( QPainter * painter, const QStyleOptionGraphicsItem *
 
 void PotentialField::SetPotentialField(float ** _potentialField, qreal _fieldCenterX, qreal _fieldCenterY)
 {
+	//if(time != NULL && time->elapsed() < 100)
+	//	return;
+	if(!time)
+	{
+		time = new QTime();
+		time->start();
+	} else
+		time->restart();
+
 	fieldCenterX = _fieldCenterX - (FIELD_WIDTH / 2) * TILE_WIDTH;
 	fieldCenterY = _fieldCenterY - (FIELD_WIDTH / 2) * TILE_WIDTH;
 
@@ -55,7 +80,7 @@ void PotentialField::SetPotentialField(float ** _potentialField, qreal _fieldCen
 			potentialField[loop1][loop2] = _potentialField[loop1][loop2];
 			if(potentialField[loop1][loop2] < minValue)
 				minValue = potentialField[loop1][loop2];
-			else if(potentialField[loop1][loop2] > maxValue && potentialField[loop1][loop2] < OBSTACLE - 1.0f)
+			else if(potentialField[loop1][loop2] > maxValue && potentialField[loop1][loop2] < OBSTACLE / 100)
 				maxValue= potentialField[loop1][loop2];
 		}
 	}
@@ -94,72 +119,151 @@ void PotentialField::FindPath()
 		minCenter = potentialField[centerY][centerX - 1];
 	}
 
-	int lastMinX;
-	int lastMinY;
-	bool isNewOptimum;
-	do {
-		PushToPath(minX, minY);
-		lastMinX = minX;
-		lastMinY = minY;
-		isNewOptimum = false;
-
-		if(lastMinY > 0 && potentialField[lastMinY - 1][lastMinX] < minCenter) 
+	priority_queue<BestFirstSearchNode> queueField;
+	queueField.push(BestFirstSearchNode(minX, minY, minCenter));
+	BestFirstSearchNode tempNode(0, 0, 0);
+	/* CLOSE SEZNAM */
+	for(int loop1 = 0; loop1 < FIELD_WIDTH; loop1++)
+	{
+		for(int loop2 = 0; loop2 < FIELD_WIDTH; loop2++)
 		{
-			isNewOptimum = true;
+			road[loop1][loop2] = NO_DIR;
+		}
+	}
+	road[minY][minX] = START;
+
+	int lastMinY;
+	int lastMinX;
+
+	bool pathFound = false;
+	while(!queueField.empty())
+	{
+		tempNode = queueField.top();
+		queueField.pop();
+
+		lastMinY = tempNode.y;
+		lastMinX = tempNode.x;
+
+		if(tempNode.value <= minValue + 0.00001f)
+		{
+			//PushToPath(lastMinX, lastMinY);
+			pathFound = true;
+			break;
+		}
+
+		if(lastMinY > 0 && road[lastMinY - 1][lastMinX] == NO_DIR) 
+		{
 			minX = lastMinX;
 			minY = lastMinY - 1;
 			minCenter = potentialField[lastMinY - 1][lastMinX];
+			queueField.push(BestFirstSearchNode(minX, minY, minCenter));
+			road[minY][minX] = UP_CENTER;
 		}
-		if(lastMinY < FIELD_WIDTH - 1 && potentialField[lastMinY + 1][lastMinX] < minCenter) 
+		if(lastMinY < FIELD_WIDTH - 1 && road[lastMinY + 1][lastMinX] == NO_DIR) 
 		{
-			isNewOptimum = true;
 			minX = lastMinX;
 			minY = lastMinY + 1;
 			minCenter = potentialField[lastMinY + 1][lastMinX];
+			queueField.push(BestFirstSearchNode(minX, minY, minCenter));
+			road[minY][minX] = DOWN_CENTER;
 		}
-		if(lastMinX > 0 && potentialField[lastMinY][lastMinX - 1] < minCenter) 
+		if(lastMinX > 0 && road[lastMinY][lastMinX - 1] == NO_DIR) 
 		{
-			isNewOptimum = true;
 			minX = lastMinX - 1;
 			minY = lastMinY;
 			minCenter = potentialField[lastMinY][lastMinX - 1];
+			queueField.push(BestFirstSearchNode(minX, minY, minCenter));
+			road[minY][minX] = LEFT;
 		}
-		if(lastMinX < FIELD_WIDTH - 1 && potentialField[lastMinY][lastMinX + 1] < minCenter) 
+		if(lastMinX < FIELD_WIDTH - 1 && road[lastMinY][lastMinX + 1] == NO_DIR) 
 		{
-			isNewOptimum = true;
 			minX = lastMinX + 1;
 			minY = lastMinY;
 			minCenter = potentialField[lastMinY][lastMinX + 1];
+			queueField.push(BestFirstSearchNode(minX, minY, minCenter));
+			road[minY][minX] = RIGHT;
 		}
-		if(lastMinY > 0 && lastMinX > 0 && potentialField[lastMinY - 1][lastMinX - 1] < minCenter) 
+		if(lastMinY > 0 && lastMinX > 0  && road[lastMinY - 1][lastMinX - 1] == NO_DIR) 
 		{
-			isNewOptimum = true;
 			minX = lastMinX - 1;
 			minY = lastMinY - 1;
 			minCenter = potentialField[lastMinY - 1][lastMinX - 1];
+			queueField.push(BestFirstSearchNode(minX, minY, minCenter));
+			road[minY][minX] = UP_LEFT;
 		}
-		if(lastMinY < FIELD_WIDTH - 1 && lastMinX < FIELD_WIDTH - 1 && potentialField[lastMinY + 1][lastMinX + 1] < minCenter) 
+		if(lastMinY < FIELD_WIDTH - 1 && lastMinX < FIELD_WIDTH - 1  && road[lastMinY + 1][lastMinX + 1] == NO_DIR) 
 		{
-			isNewOptimum = true;
 			minX = lastMinX + 1;
 			minY = lastMinY + 1;
 			minCenter = potentialField[lastMinY + 1][lastMinX + 1];
+			queueField.push(BestFirstSearchNode(minX, minY, minCenter));
+			road[minY][minX] = DOWN_RIGHT;
 		}
-		if(lastMinX > 0 && lastMinY < FIELD_WIDTH - 1 && potentialField[lastMinY + 1][lastMinX - 1] < minCenter) 
+		if(lastMinX > 0 && lastMinY < FIELD_WIDTH - 1  && road[lastMinY + 1][lastMinX - 1] == NO_DIR) 
 		{
-			isNewOptimum = true;
 			minX = lastMinX - 1;
 			minY = lastMinY + 1;
 			minCenter = potentialField[lastMinY + 1][lastMinX - 1];
+			queueField.push(BestFirstSearchNode(minX, minY, minCenter));
+			road[minY][minX] = DOWN_LEFT;
 		}
-		if(lastMinX < FIELD_WIDTH - 1 && lastMinY > 0 && potentialField[lastMinY - 1][lastMinX + 1] < minCenter) 
+		if(lastMinX < FIELD_WIDTH - 1 && lastMinY > 0 && road[lastMinY - 1][lastMinX + 1] == NO_DIR) 
 		{
-			isNewOptimum = true;
 			minX = lastMinX + 1;
 			minY = lastMinY - 1;
 			minCenter = potentialField[lastMinY - 1][lastMinX + 1];
+			queueField.push(BestFirstSearchNode(minX, minY, minCenter));
+			road[minY][minX] = UP_RIGHT;
 		}
-	}while(isNewOptimum);
+	}
+
+	if(!pathFound)
+		return;
+
+	int newMinX = lastMinX, newMinY = lastMinY;
+	while(road[newMinY][newMinX] != START)
+	{
+		lastMinX = newMinX;
+		lastMinY = newMinY;
+		switch(road[lastMinY][lastMinX])
+		{
+			case UP_LEFT :
+				newMinX = lastMinX + 1;
+				newMinY = lastMinY + 1;
+				break;
+			case UP_CENTER :
+				newMinY = lastMinY + 1;
+				break; 
+			case UP_RIGHT :
+				newMinX = lastMinX - 1;
+				newMinY = lastMinY + 1;
+				break;
+			case LEFT :
+				newMinX = lastMinX + 1;
+				break;
+			case RIGHT :
+				newMinX = lastMinX - 1;
+				break;
+			case DOWN_LEFT :
+				newMinX = lastMinX + 1;
+				newMinY = lastMinY - 1;
+				break;
+			
+			case DOWN_CENTER :
+				newMinY = lastMinY - 1;
+				break;
+			case DOWN_RIGHT :
+				newMinX = lastMinX - 1;
+				newMinY = lastMinY - 1;
+				break;
+		}
+
+		road[lastMinY][lastMinX] = ON_ROAD;
+		if(road[newMinY][newMinX] != START)
+		{
+			PushToPath(newMinX, newMinY);
+		}
+	}
 
 	agent->SetPath(&path);
 }
