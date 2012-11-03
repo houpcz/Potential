@@ -11,8 +11,8 @@ MainWindow::MainWindow(QWidget *parent)
 	setCentralWidget(playground);
 }
 
-
 MainWindow::~MainWindow(void)
 {
-	delete playground;
+	if(playground != NULL)
+		delete playground;
 }

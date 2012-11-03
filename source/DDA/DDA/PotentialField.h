@@ -9,7 +9,7 @@ class PotentialField : public QGraphicsRectItem
 {
 public :
 	static const int FIELD_WIDTH = 32;
-	static const int TILE_WIDTH = 4;
+	static const int TILE_WIDTH = 5;
 	static const int OBSTACLE = 100000;
 private:
 	static const char ON_ROAD = 'R';
@@ -25,6 +25,8 @@ private:
 	static const char DOWN_RIGHT = '3';
 
 	Agent * agent;
+	int agentCenterX;
+	int agentCenterY;
 	qreal fieldCenterX;
 	qreal fieldCenterY;
 	float minValue;

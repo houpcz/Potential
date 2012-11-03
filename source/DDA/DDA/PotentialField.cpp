@@ -62,6 +62,12 @@ void PotentialField::SetPotentialField(float ** _potentialField, qreal _fieldCen
 	fieldCenterX = _fieldCenterX - (FIELD_WIDTH / 2) * TILE_WIDTH;
 	fieldCenterY = _fieldCenterY - (FIELD_WIDTH / 2) * TILE_WIDTH;
 
+	Point2D fieldCenter = agent->FieldCenter();
+	int plusX = (fieldCenter.X() - _fieldCenterX) / TILE_WIDTH;
+	int plusY = (fieldCenter.Y() - _fieldCenterY) / TILE_WIDTH;
+	agentCenterX = FIELD_WIDTH / 2 + plusX;
+	agentCenterY = FIELD_WIDTH / 2 + plusY;
+
 	maxValue = -1;
 	minValue = potentialField[0][0];
 	for(int loop1 = 0; loop1 < FIELD_WIDTH; loop1++)
@@ -83,8 +89,8 @@ void PotentialField::SetPotentialField(float ** _potentialField, qreal _fieldCen
 
 void PotentialField::FindPath()
 {
-	int centerX = FIELD_WIDTH / 2;
-	int centerY = FIELD_WIDTH / 2;
+	int centerX = agentCenterX;
+	int centerY = agentCenterY;
 	int minCenter;
 	int minX, minY;
 	minCenter = potentialField[centerY][centerX];

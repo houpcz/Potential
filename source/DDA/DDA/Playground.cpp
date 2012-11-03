@@ -6,8 +6,8 @@
 Playground::Playground(QWidget *parent)
      : QWidget(parent)
 {
-	numberAgents = 50;
-	numberObstacles = 99;
+	numberAgents = 30;
+	numberObstacles = 50;
 	SetEnvironment();
 	QGraphicsView * view = new QGraphicsView(&scene);
 	QHBoxLayout * layout = new QHBoxLayout();
@@ -26,10 +26,12 @@ Playground::Playground(QWidget *parent)
 
 Playground::~Playground(void)
 {
+	qDebug("Closing playground");
 	delete timer;
 	worker->Kill();
-	while(!worker->GetIsFinished())
+	while(worker->isRunning())
 		;
+	delete worker;
 	ClearEnvironment();
 }
 
@@ -83,7 +85,7 @@ void Playground::SetEnvironment()
 	ClearEnvironment();
 
 	srand(numberAgents * numberObstacles);
-	//srand(121);
+
 	Obstacle * tempObstacle;
 	QPolygonF polygon;
 	int centerX, centerY;

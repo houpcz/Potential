@@ -10,6 +10,7 @@ using namespace std;
 class Agent : public QGraphicsEllipseItem
 {
 private:
+	static const int SPEED_PX_PER_S = 20;
 	int goalX, goalY;
 	Point2D velocity;
 	Point2D realPos;
@@ -23,6 +24,7 @@ public:
 	int GoalX() { return goalX; };
 	int GoalY() { return goalY; };
 	Point2D RealPos() { return realPos; };
+	Point2D FieldCenter();
 	void SetPath(stack<Point2D> * _path);
 };
 

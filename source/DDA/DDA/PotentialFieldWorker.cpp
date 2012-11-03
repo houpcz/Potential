@@ -25,6 +25,7 @@ PotentialFieldWorker::~PotentialFieldWorker(void)
 	}
 	delete [] fieldCenterX;
 	delete [] fieldCenterY;
+	qDebug("Finished worker", shouldBeRunning);
 }
 
 void PotentialFieldWorker::run()
@@ -43,8 +44,11 @@ void PotentialFieldWorker::run()
 	isFinished = false;
 	shouldBeRunning = true;
 	requestForNewFields = false;
+	QTime time;
+	time.start();
 	while(shouldBeRunning)
 	{
+		time.restart();
 		for(int loop1 = 0; loop1 < agentSize; loop1++)
 		{
 			if(!shouldBeRunning)
@@ -52,12 +56,16 @@ void PotentialFieldWorker::run()
 			CountPotentialField(loop1);
 		}
 
+		qDebug("Elapsed time during counting %d p. fields = %dms", agentSize, time.elapsed());
+		
+
 		newFieldsPrepared = true;
 		while(!requestForNewFields && shouldBeRunning)
 			this->msleep(10);
 		requestForNewFields = false;
 		newFieldsPrepared = false;
 	}
+	
 	isFinished = true;
 }
 
@@ -68,10 +76,9 @@ void PotentialFieldWorker::SendPotentionalFieldToAgent(int agentID, PotentialFie
 	 
 void PotentialFieldWorker::CountPotentialField(int agentID)
 {
-	fieldCenterX[agentID] = (*agent)[agentID]->rect().x() + (*agent)[agentID]->pos().x() + (*agent)[agentID]->rect().width()/2;
-	fieldCenterY[agentID] = (*agent)[agentID]->rect().y() + (*agent)[agentID]->pos().y() + (*agent)[agentID]->rect().height()/2;
-	fieldCenterX[agentID] = fieldCenterX[agentID] - fmod(fieldCenterX[agentID], PotentialField::TILE_WIDTH);
-	fieldCenterY[agentID] = fieldCenterY[agentID] - fmod(fieldCenterY[agentID], PotentialField::TILE_WIDTH);
+	Point2D fieldCenter = (*agent)[agentID]->FieldCenter();
+	fieldCenterX[agentID] = fieldCenter.X();
+	fieldCenterY[agentID] = fieldCenter.Y();
 
 	int x, y;
 	int goalX = (*agent)[agentID]->GoalX();
@@ -141,6 +148,7 @@ float PotentialFieldWorker::CountPotentialFieldTile(int agentID, int x, int y, i
 	}
 	float obst = inTriangle ? PotentialField::OBSTACLE : 0;
 
+	/*
 	bool inAgent = false;
 	for(int loop1 = 0; loop1 < agent->size(); loop1++)
 	{
@@ -154,6 +162,6 @@ float PotentialFieldWorker::CountPotentialFieldTile(int agentID, int x, int y, i
 		}
 	}
 	float ag = inAgent ? PotentialField::OBSTACLE / 10 : 0;
-
-	return initValue + obst + ag;
+	*/
+	return initValue + obst;
 }

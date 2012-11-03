@@ -1,4 +1,5 @@
 #include "Agent.h"
+#include "PotentialField.h"
 #include <QBrush>
 #include <QPainter>
 #include <QDebug>
@@ -53,7 +54,7 @@ void Agent::Tick(int millis)
 		}while(wasPop && !path.empty());
 
 		velocity.Set(waypoint.X() - realPos.X(), waypoint.Y() - realPos.Y());
-		velocity.SetLength(25.0f);
+		velocity.SetLength(SPEED_PX_PER_S);
 	} else {
 		velocity.SetLength(0.0f);
 	}
@@ -82,4 +83,14 @@ void Agent::SetPath(stack<Point2D> * _path)
 		path.push(_path->top());
 		_path->pop();
 	}
+}
+
+Point2D Agent::FieldCenter()
+{
+	float fieldCenterX = rect().x() + pos().x() + rect().width()/2;
+	float fieldCenterY = rect().y() + pos().y() + rect().height()/2;
+	fieldCenterX = fieldCenterX - fmod(fieldCenterX, PotentialField::TILE_WIDTH);
+	fieldCenterY = fieldCenterY - fmod(fieldCenterY, PotentialField::TILE_WIDTH);
+
+	return Point2D(fieldCenterX, fieldCenterY);
 }
