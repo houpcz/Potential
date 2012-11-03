@@ -70,12 +70,24 @@
     <ClCompile Include="BestFirstSearchNode.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="PotentialFieldWorker.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_PotentialFieldWorker.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_PotentialFieldWorker.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="MainWindow.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
     <CustomBuild Include="Playground.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="PotentialFieldWorker.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
   </ItemGroup>

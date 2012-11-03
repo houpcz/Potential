@@ -6,7 +6,9 @@
 #include <QGraphicsView.h>
 #include <QGraphicsItem>
 #include <vector>
+#include <QThread>
 
+#include "PotentialFieldWorker.h"
 #include "Agent.h"
 #include "Obstacle.h"
 #include "PotentialField.h"
@@ -32,19 +34,13 @@ private :
 	vector<GoalPoint *> goalPoint;
 	QTime time;
 
-	qreal fieldCenterX;
-	qreal fieldCenterY;
-	float ** potentialField;
-
-	int lastAgentFieldID;
+	QThread* thread;
+	PotentialFieldWorker* worker;
 public:
 	Playground(QWidget *parent = 0);
 	~Playground(void);
 	void SetEnvironment();
 	void ClearEnvironment();
-	void CountPotentialField(int agentID);
-	float CountPotentialFieldTile(int agentID, int x, int y, int goalX, int goalY);
-	float CountPotentialFieldTilePostProcess(int row, int col);
 public slots:
 	void Tick();
 };

@@ -1,6 +1,7 @@
 #include "Agent.h"
 #include <QBrush>
 #include <QPainter>
+#include <QDebug>
 
 Agent::Agent(qreal x, qreal y, qreal width, qreal height, QGraphicsItem * parent) : realPos(x, y), velocity(0, 0), QGraphicsEllipseItem (x, y, width, height, parent)
 {
@@ -26,8 +27,12 @@ Agent::~Agent(void)
 
 void Agent::Tick(int millis)
 {
-	setX(x() + velocity.X() * millis / 1000.0);
-	setY(y() + velocity.Y() * millis / 1000.0);
+	float dx = velocity.X() * millis / 1000.0f;
+	float dy = velocity.Y() * millis / 1000.0f;
+	setX(x() + dx);
+	setY(y() + dy);
+	float whatX = x();
+	float whatY = y();
 
 	realPos.Set(x() + rect().x(), y() + rect().y());
 
@@ -39,7 +44,8 @@ void Agent::Tick(int millis)
 		do {
 			wasPop = false;
 			waypoint = path.front();
-			if(realPos.Distance(waypoint) < 2 || realPos.Distance(Point2D(goalX, goalY)) < 4 )
+			float realPosDist = realPos.Distance(waypoint);
+			if(realPosDist < 3 || realPos.Distance(Point2D(goalX, goalY)) < 4 )
 			{
 				path.pop();
 				wasPop = true;

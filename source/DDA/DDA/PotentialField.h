@@ -8,7 +8,7 @@
 class PotentialField : public QGraphicsRectItem
 {
 public :
-	static const int FIELD_WIDTH = 40;
+	static const int FIELD_WIDTH = 32;
 	static const int TILE_WIDTH = 4;
 	static const int OBSTACLE = 100000;
 private:

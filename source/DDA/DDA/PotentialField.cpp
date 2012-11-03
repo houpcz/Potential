@@ -59,15 +59,6 @@ void PotentialField::paint( QPainter * painter, const QStyleOptionGraphicsItem *
 
 void PotentialField::SetPotentialField(float ** _potentialField, qreal _fieldCenterX, qreal _fieldCenterY)
 {
-	//if(time != NULL && time->elapsed() < 100)
-	//	return;
-	if(!time)
-	{
-		time = new QTime();
-		time->start();
-	} else
-		time->restart();
-
 	fieldCenterX = _fieldCenterX - (FIELD_WIDTH / 2) * TILE_WIDTH;
 	fieldCenterY = _fieldCenterY - (FIELD_WIDTH / 2) * TILE_WIDTH;
 
