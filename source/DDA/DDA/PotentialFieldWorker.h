@@ -15,14 +15,17 @@ private:
 	vector<Agent *> *agent;
 	vector<Obstacle *> *obstacle;
 
-	qreal * fieldCenterX;
-	qreal * fieldCenterY;
+	int * goalX;
+	int * goalY;
+	float * fieldCenterX;
+	float * fieldCenterY;
 	float *** manyPotentialFields;
 
 	bool requestForNewFields;
 	bool newFieldsPrepared;
 	bool shouldBeRunning;
 	bool isFinished;
+	int lastTimeElapsed;
 public:
 	PotentialFieldWorker(vector<Agent *> *_agent, vector<Obstacle *> *_obstacle);
 	~PotentialFieldWorker(void);
@@ -37,6 +40,7 @@ public:
 	void Kill() { shouldBeRunning = false; }
 	bool GetIsFinished() { return isFinished; }
 	bool GetNewFieldsPrepared() { return newFieldsPrepared; }
+	int GetLastTimeElapsedMS() { return lastTimeElapsed; }
 	void RequestForNewFields() { newFieldsPrepared = false; requestForNewFields = true; }
     void run();
 };

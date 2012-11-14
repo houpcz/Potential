@@ -1,8 +1,9 @@
 #include "PotentialFieldWorker.h"
-
+#include "gpuPotentialFieldsWrapper.h"
 
 PotentialFieldWorker::PotentialFieldWorker(vector<Agent *> *_agent, vector<Obstacle *> *_obstacle)
 {
+	lastTimeElapsed = 0;
 	agent = _agent;
 	obstacle = _obstacle;
 	agentSize = agent->size();
@@ -25,14 +26,21 @@ PotentialFieldWorker::~PotentialFieldWorker(void)
 	}
 	delete [] fieldCenterX;
 	delete [] fieldCenterY;
+	delete [] goalX;
+	delete [] goalY;
+
+	gpuFreeMemory();
+
 	qDebug("Finished worker", shouldBeRunning);
 }
 
 void PotentialFieldWorker::run()
 {
 	manyPotentialFields = new float**[agentSize];
-	fieldCenterX = new qreal[agentSize];
-	fieldCenterY = new qreal[agentSize];
+	fieldCenterX = new float[agentSize];
+	fieldCenterY = new float[agentSize];
+	goalX = new int[agentSize];
+	goalY = new int[agentSize];
 	for(int loop2 = 0; loop2 < agentSize; loop2++)
 	{
 		manyPotentialFields[loop2] = new float*[PotentialField::FIELD_WIDTH];
@@ -44,6 +52,11 @@ void PotentialFieldWorker::run()
 	isFinished = false;
 	shouldBeRunning = true;
 	requestForNewFields = false;
+
+	gpuAllocMemory(agentSize, PotentialField::FIELD_WIDTH, PotentialField::TILE_WIDTH);
+
+	lastTimeElapsed = 0;
+
 	QTime time;
 	time.start();
 	while(shouldBeRunning)
@@ -51,13 +64,25 @@ void PotentialFieldWorker::run()
 		time.restart();
 		for(int loop1 = 0; loop1 < agentSize; loop1++)
 		{
+			Point2D fieldCenter = (*agent)[loop1]->FieldCenter();
+			fieldCenterX[loop1] = fieldCenter.X();
+			fieldCenterY[loop1] = fieldCenter.Y();
+			goalX[loop1] = (*agent)[loop1]->GoalX();
+			goalY[loop1] = (*agent)[loop1]->GoalY();
+		}
+
+		/*
+		for(int loop1 = 0; loop1 < agentSize; loop1++)
+		{
 			if(!shouldBeRunning)
 				break;
 			CountPotentialField(loop1);
-		}
+		}*/
+
+		gpuCountPotentialFields(manyPotentialFields, fieldCenterX, fieldCenterY, goalX, goalY);
 
 		qDebug("Elapsed time during counting %d p. fields = %dms", agentSize, time.elapsed());
-		
+		lastTimeElapsed = time.elapsed();
 
 		newFieldsPrepared = true;
 		while(!requestForNewFields && shouldBeRunning)
@@ -76,20 +101,16 @@ void PotentialFieldWorker::SendPotentionalFieldToAgent(int agentID, PotentialFie
 	 
 void PotentialFieldWorker::CountPotentialField(int agentID)
 {
-	Point2D fieldCenter = (*agent)[agentID]->FieldCenter();
-	fieldCenterX[agentID] = fieldCenter.X();
-	fieldCenterY[agentID] = fieldCenter.Y();
-
 	int x, y;
-	int goalX = (*agent)[agentID]->GoalX();
-	int goalY = (*agent)[agentID]->GoalY();
+	int gX = goalX[agentID];
+	int gY = goalY[agentID];
 	for(int loop1 = 0; loop1 < PotentialField::FIELD_WIDTH; loop1++)
 	{
 		for(int loop2 = 0; loop2 < PotentialField::FIELD_WIDTH; loop2++)
 		{
 			x = (int) fieldCenterX[agentID] + (loop2 - (PotentialField::FIELD_WIDTH / 2)) * PotentialField::TILE_WIDTH;
 			y = (int) fieldCenterY[agentID] + (loop1 - (PotentialField::FIELD_WIDTH / 2)) * PotentialField::TILE_WIDTH;
-			manyPotentialFields[agentID][loop1][loop2] = CountPotentialFieldTile(agentID, x, y, goalX, goalY);
+			manyPotentialFields[agentID][loop1][loop2] = CountPotentialFieldTile(agentID, x, y, gX, gY);
 		}
 	}
 	if(!shouldBeRunning)

@@ -110,5 +110,16 @@
     <ClInclude Include="BestFirstSearchNode.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="gpuPotentialFieldsWrapper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CudaCompile Include="gpuPotentialFieldsWrapper.cu">
+      <Filter>Source Files</Filter>
+    </CudaCompile>
+    <CudaCompile Include="gpuKernel.cu">
+      <Filter>Source Files</Filter>
+    </CudaCompile>
   </ItemGroup>
 </Project>

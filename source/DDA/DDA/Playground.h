@@ -25,6 +25,7 @@ private :
 	QTimer * timer;
 	QGraphicsScene scene;
 	QGraphicsItem * item;
+	QGraphicsSimpleTextItem * countingTimeText;
 
 	int numberAgents;
 	int numberObstacles;
@@ -37,7 +38,7 @@ private :
 	QThread* thread;
 	PotentialFieldWorker* worker;
 public:
-	Playground(QWidget *parent = 0);
+	Playground(QWidget *parent = 0, int _numberAgents = 10, int _numberObstacles = 50);
 	~Playground(void);
 	void SetEnvironment();
 	void ClearEnvironment();

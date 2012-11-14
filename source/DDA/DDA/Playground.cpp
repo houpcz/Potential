@@ -3,11 +3,12 @@
 #include <math.h>
 #include "Playground.h"
 
-Playground::Playground(QWidget *parent)
+Playground::Playground(QWidget *parent, int _numberAgents, int _numberObstacles)
      : QWidget(parent)
 {
-	numberAgents = 30;
-	numberObstacles = 50;
+	numberAgents = _numberAgents;
+	numberObstacles = _numberObstacles;
+	countingTimeText = NULL;
 	SetEnvironment();
 	QGraphicsView * view = new QGraphicsView(&scene);
 	QHBoxLayout * layout = new QHBoxLayout();
@@ -49,6 +50,10 @@ void Playground::Tick()
 
 	if(worker->GetNewFieldsPrepared())
 	{
+		char newText[20];
+		sprintf(newText, "%d", worker->GetLastTimeElapsedMS());
+		countingTimeText->setText(newText);
+		
 		for(int loop1 = 0; loop1 < agent.size(); loop1++)
 		{
 			worker->SendPotentionalFieldToAgent(loop1, field[loop1]);
@@ -59,6 +64,8 @@ void Playground::Tick()
 
 void Playground::ClearEnvironment()
 {
+	if(countingTimeText != NULL)
+		scene.removeItem(countingTimeText);
 	for(int loop1 = 0; loop1 < agent.size(); loop1++)
 	{
 		scene.removeItem(agent[loop1]);
@@ -83,6 +90,8 @@ void Playground::ClearEnvironment()
 void Playground::SetEnvironment()
 {
 	ClearEnvironment();
+
+	countingTimeText = scene.addSimpleText(QString("0"));
 
 	srand(numberAgents * numberObstacles);
 

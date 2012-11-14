@@ -6,7 +6,7 @@ MainWindow::MainWindow(QWidget *parent)
 {
 	setWindowTitle(tr("Motion planning using potencial fields"));
 
-	playground = new Playground(this);
+	playground = new Playground(this, 50, 10);
 
 	setCentralWidget(playground);
 }

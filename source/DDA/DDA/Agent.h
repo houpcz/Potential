@@ -1,4 +1,5 @@
-#pragma once
+#ifndef _AGENT_H_
+#define _AGENT_H_
 
 #include <QGraphicsItem>
 #include <queue>
@@ -28,3 +29,4 @@ public:
 	void SetPath(stack<Point2D> * _path);
 };
 
+#endif
