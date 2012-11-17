@@ -4,21 +4,12 @@
 #include <QThread>
 #include "PotentialField.h"
 #include "Obstacle.h"
+#include "Triangle.h"
 
 using namespace std;
 
 class PotentialFieldWorker  : public QThread {
     Q_OBJECT
-
-typedef struct Point2d
-{
-	float x;
-	float y;
-};
-typedef struct Triangle
-{
-	Point2d p[3];
-};
 
 private:
 	int agentSize;

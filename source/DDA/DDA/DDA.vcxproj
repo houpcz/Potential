@@ -141,6 +141,7 @@
     <ClInclude Include="Obstacle.h" />
     <ClInclude Include="Point2D.h" />
     <ClInclude Include="PotentialField.h" />
+    <ClInclude Include="Triangle.h" />
     <CustomBuild Include="PotentialFieldWorker.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing PotentialFieldWorker.h...</Message>

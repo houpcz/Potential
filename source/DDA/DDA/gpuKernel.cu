@@ -4,15 +4,18 @@
 #include <device_launch_parameters.h>
 #include <device_functions.h>
 #include <math.h>
+#include "Triangle.h"
 
 #define MAX(a, b) (((a) > (b)) ? (a) : (b))
 
-/*
-__device__ bool max(int val1, int val2)
+__device__ bool pointTriangleTest(Point2d & p, Triangle & t)
 {
-	return (val1 > val2) ? val1 : val2;
+	float ab = (t.p[0].x - p.x) * (t.p[1].y - p.y) - (t.p[1].x - p.x) * (t.p[0].y - p.y);
+	float bc = (t.p[1].x - p.x) * (t.p[2].y - p.y) - (t.p[2].x - p.x) * (t.p[1].y - p.y);
+	float ca = (t.p[2].x - p.x) * (t.p[0].y - p.y) - (t.p[0].x - p.x) * (t.p[2].y - p.y);
+	
+	return (ab <= 0.0f && bc <= 0.0f && ca <= 0.0f) || (ab >= 0.0f && bc >= 0.0f && ca >= 0.0f);
 }
-*/
 
 __device__ float countFieldTile(int x, int y, int goalX, int goalY)
 {
