@@ -22,8 +22,6 @@ private:
 	int obstAreaLeft;
 	int cellWidth;
 	int cellHeight;
-	static const int AREA_CELL_WIDTH = 8;
-	static const int AREA_CELL_HEIGHT = 8;
 	Triangle *triangle;
 	int * quadTree;			// in each cell is end index to triangleIds, for eaxample potential tile goes to quadTree[0], triangles in this tree are with indeces triangleIDs[0] to triangleIDs[quadTree[0] - 1]
 	int * triangleIDs;		// indexes to triangle

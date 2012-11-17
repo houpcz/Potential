@@ -121,8 +121,5 @@
     <CudaCompile Include="gpuPotentialFieldsWrapper.cu">
       <Filter>Source Files</Filter>
     </CudaCompile>
-    <CudaCompile Include="gpuKernel.cu">
-      <Filter>Source Files</Filter>
-    </CudaCompile>
   </ItemGroup>
 </Project>

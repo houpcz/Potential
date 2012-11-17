@@ -154,7 +154,6 @@
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
-    <CudaCompile Include="gpuKernel.cu" />
     <CudaCompile Include="gpuPotentialFieldsWrapper.cu" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

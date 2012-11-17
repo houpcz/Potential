@@ -2,8 +2,11 @@
 #include "gpuPotentialFieldsWrapper.h"
 #include <set>
 
+#define _GPU_
+
 PotentialFieldWorker::PotentialFieldWorker(vector<Agent *> *_agent, vector<Obstacle *> *_obstacle)
 {
+	newFieldsPrepared = false;
 	lastTimeElapsed = 0;
 	agent = _agent;
 	obstacle = _obstacle;
@@ -119,6 +122,8 @@ void PotentialFieldWorker::BuildSimpleQuadTree()
 			}
 		}
 	}
+
+	gpuAllocObstacles(obstAreaLeft, obstAreaTop, cellWidth, cellHeight, quadTree, triangle, obstacle->size(), triangleIDs, id);
 }
 
 bool PotentialFieldWorker::PointTriangleTest(Point2d & p, Triangle & t)
@@ -174,15 +179,16 @@ void PotentialFieldWorker::run()
 			goalY[loop1] = (*agent)[loop1]->GoalY();
 		}
 
-		
+#ifndef _GPU_
 		for(int loop1 = 0; loop1 < agentSize; loop1++)
 		{
 			if(!shouldBeRunning)
 				break;
 			CountPotentialField(loop1);
 		}
-
-		//gpuCountPotentialFields(manyPotentialFields, fieldCenterX, fieldCenterY, goalX, goalY);
+#else
+		gpuCountPotentialFields(manyPotentialFields, fieldCenterX, fieldCenterY, goalX, goalY);
+#endif
 
 		qDebug("Elapsed time during counting %d p. fields = %dms", agentSize, time.elapsed());
 		lastTimeElapsed = time.elapsed();

@@ -3,6 +3,12 @@
 #include <string.h>
 #include <cuda.h>
 #include <cuda_runtime.h>
+#include <cuda_runtime_api.h>
+#include <device_launch_parameters.h>
+#include <device_functions.h>
+#include <math.h>
+
+#include "Triangle.h"
 
 __global__ void countFields(float * devPotentialField, int fieldWidth, int tileWidth, float * fieldCenterX, float * fieldCenterY, int * goalX, int * goalY);
 
@@ -32,6 +38,16 @@ HandleError (cudaError_t error, const char *file, int line)
 }
 
 #define CHECK_ERROR( error ) ( HandleError( error, __FILE__, __LINE__ ) )
+
+#define OBST_AREA_LEFT 0
+#define OBST_AREA_TOP 1
+#define CELL_WIDTH 2
+#define CELL_HEIGHT 3
+__constant__ int param[4];
+
+__constant__ int quadTree[AREA_CELL_WIDTH * AREA_CELL_HEIGHT];
+__constant__ Triangle triangle[MAX_TRIANGLE];
+__constant__ int triangleIDs[MAX_TRIANGLE_IDS];
 
 float * cpuPotentialField;
 float * devPotentialField;
@@ -66,6 +82,20 @@ void gpuAllocMemory(int _numberAgents, int _fieldWidth, int _tileWidth)
 	cudaMalloc( (void**)&devGoalY, memGoal);
 }
 
+void gpuAllocObstacles(int _obstAreaLeft, int _obstAreaTop, int _cellWidth, int _cellHeight, int * _quadTree, Triangle *_triangle, int triangleSize, int * _triangleIDs, int triangleIDsSize)
+{
+	int _param[4];
+	_param[0] = _obstAreaLeft;
+	_param[1] = _obstAreaTop;
+	_param[2] = _cellWidth;
+	_param[3] = _cellHeight;
+
+	cudaMemcpyToSymbol((const char *) param, _param, sizeof(int) * 4) ;
+	cudaMemcpyToSymbol((const char *) triangle, _triangle, sizeof(Triangle) * triangleSize) ;
+	cudaMemcpyToSymbol((const char *) quadTree, _quadTree, sizeof(int) * AREA_CELL_WIDTH * AREA_CELL_HEIGHT) ;
+	cudaMemcpyToSymbol((const char *) triangleIDs, _triangleIDs, sizeof(int) * triangleIDsSize) ;
+}
+
 void gpuCountPotentialFields(float *** potentialField, float * cpuFieldCenterX, float * cpuFieldCenterY, int * cpuGoalX, int * cpuGoalY)
 {
 	// grid configuration1
@@ -97,4 +127,75 @@ void gpuFreeMemory()
 	cudaFree(devFieldCenterY);
 	cudaFree(devGoalX);
 	cudaFree(devGoalY);
+}
+
+#define MAX(a, b) (((a) > (b)) ? (a) : (b))
+
+__device__ bool pointTriangleTest(int x, int y, const Triangle & t)
+{
+	float ab = (t.p[0].x - x) * (t.p[1].y - y) - (t.p[1].x - x) * (t.p[0].y - y);
+	float bc = (t.p[1].x - x) * (t.p[2].y - y) - (t.p[2].x - x) * (t.p[1].y - y);
+	float ca = (t.p[2].x - x) * (t.p[0].y - y) - (t.p[0].x - x) * (t.p[2].y - y);
+	
+	return (ab <= 0.0f && bc <= 0.0f && ca <= 0.0f) || (ab >= 0.0f && bc >= 0.0f && ca >= 0.0f);
+}
+
+__device__ float countFieldTile(int x, int y, int goalX, int goalY)
+{
+	float dx = x - goalX;
+	float dy = y - goalY;
+	float initValue = sqrtf(dx * dx + dy * dy);
+
+	int areaX = x - param[OBST_AREA_LEFT];
+	int areaY = y - param[OBST_AREA_TOP];
+	float obst = 0.0f;
+
+	
+	if(areaX >= 0 && areaY >= 0 && 
+	   areaX < param[CELL_WIDTH] * AREA_CELL_WIDTH &&
+	   areaY < param[CELL_HEIGHT] * AREA_CELL_HEIGHT)
+	{
+		int yid = areaY / param[CELL_HEIGHT];
+		int xid = areaX / param[CELL_WIDTH];
+		int id = xid + yid * AREA_CELL_WIDTH;
+		int startX;
+		if(id == 0)
+			startX = 0;
+		else
+			startX = quadTree[id - 1];
+		int endX = quadTree[id];
+
+		for(int loop1 = startX; loop1 < endX; loop1++)
+		{
+			if(pointTriangleTest(x, y, triangle[triangleIDs[loop1]]))
+			{
+				obst = 10000.0f;
+				break;
+			}
+		}
+	}
+	
+	return initValue + obst;
+}
+
+__global__ void countFields(float * devPotentialField, int fieldWidth, int tileWidth, float * fieldCenterX, float * fieldCenterY, int * goalX, int * goalY)
+{
+	int fieldID = blockIdx.x;
+	int threadX = threadIdx.x;
+	int threadY = threadIdx.y;
+	int myWorkFieldWidth = fieldWidth / blockDim.x;
+	int myWorkFieldHeight = fieldWidth / blockDim.y;
+	int endWorkX = MAX((threadX + 1) * myWorkFieldWidth, fieldWidth);
+	int endWorkY = MAX((threadY + 1) * myWorkFieldHeight, fieldWidth);
+	int x, y;
+
+	for(int loop1 = threadY * myWorkFieldWidth; loop1 < endWorkY; loop1++)
+	{
+		for(int loop2 = threadX * myWorkFieldWidth; loop2 < endWorkX; loop2++)
+		{
+			x = (int) fieldCenterX[fieldID] + (loop2 - (fieldWidth / 2)) * tileWidth; 
+			y = (int) fieldCenterY[fieldID] + (loop1 - (fieldWidth / 2)) * tileWidth;
+			devPotentialField[fieldID * fieldWidth * fieldWidth + loop1 * fieldWidth + loop2] = countFieldTile(x, y, goalX[fieldID], goalY[fieldID]);
+		}
+	}
 }
