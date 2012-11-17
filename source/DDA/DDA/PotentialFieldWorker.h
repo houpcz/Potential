@@ -10,15 +10,38 @@ using namespace std;
 class PotentialFieldWorker  : public QThread {
     Q_OBJECT
 
+typedef struct Point2d
+{
+	float x;
+	float y;
+};
+typedef struct Triangle
+{
+	Point2d p[3];
+};
+
 private:
 	int agentSize;
 	vector<Agent *> *agent;
 	vector<Obstacle *> *obstacle;
 
+	int obstAreaTop;
+	int obstAreaBottom;
+	int obstAreaRight;
+	int obstAreaLeft;
+	int cellWidth;
+	int cellHeight;
+	static const int AREA_CELL_WIDTH = 8;
+	static const int AREA_CELL_HEIGHT = 8;
+	Triangle *triangle;
+	int * quadTree;			// in each cell is end index to triangleIds, for eaxample potential tile goes to quadTree[0], triangles in this tree are with indeces triangleIDs[0] to triangleIDs[quadTree[0] - 1]
+	int * triangleIDs;		// indexes to triangle
+
 	int * goalX;
 	int * goalY;
 	float * fieldCenterX;
 	float * fieldCenterY;
+	float ** tempField;
 	float *** manyPotentialFields;
 
 	bool requestForNewFields;
@@ -26,6 +49,10 @@ private:
 	bool shouldBeRunning;
 	bool isFinished;
 	int lastTimeElapsed;
+
+	bool PointTriangleTest(Point2d & p, Triangle & t);
+	void BuildSimpleQuadTree();
+
 public:
 	PotentialFieldWorker(vector<Agent *> *_agent, vector<Obstacle *> *_obstacle);
 	~PotentialFieldWorker(void);

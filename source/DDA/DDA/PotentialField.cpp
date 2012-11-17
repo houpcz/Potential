@@ -10,9 +10,12 @@ bool operator<(const BestFirstSearchNode & node1, const BestFirstSearchNode & no
 	return node1.value > node2.value;
 }
 
+int PotentialField::potentialFieldCount = 0;
+
 PotentialField::PotentialField(Agent * _agent,  qreal x, qreal y, QGraphicsItem * parent) :  QGraphicsRectItem( x - (FIELD_WIDTH / 2) * TILE_WIDTH, y  - (FIELD_WIDTH / 2) * TILE_WIDTH, TILE_WIDTH * FIELD_WIDTH, TILE_WIDTH * FIELD_WIDTH, parent )
 {
 	agent = _agent;
+	fieldID = potentialFieldCount++;
 	fieldCenterX = 0.0f;
 	fieldCenterY = 0.0f;
 	time = NULL;
@@ -27,7 +30,8 @@ PotentialField::~PotentialField(void)
 
 void PotentialField::paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget)
 {
-	return;
+	if(fieldID != 0)
+		return;
 
 	float variance = maxValue - minValue;
 	if(variance == 0.0f)
@@ -218,6 +222,7 @@ void PotentialField::FindPath()
 		return;
 
 	int newMinX = lastMinX, newMinY = lastMinY;
+	int checkPointNumber = 0;
 	while(road[newMinY][newMinX] != START)
 	{
 		lastMinX = newMinX;
@@ -258,6 +263,8 @@ void PotentialField::FindPath()
 		road[lastMinY][lastMinX] = ON_ROAD;
 		if(road[newMinY][newMinX] != START)
 		{
+			checkPointNumber++;
+			//if(checkPointNumber % 3 == 0)
 			PushToPath(newMinX, newMinY);
 		}
 	}

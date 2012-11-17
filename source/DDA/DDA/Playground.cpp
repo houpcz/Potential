@@ -92,6 +92,7 @@ void Playground::SetEnvironment()
 	ClearEnvironment();
 
 	countingTimeText = scene.addSimpleText(QString("0"));
+	countingTimeText->setPos(-100, 100);
 
 	srand(numberAgents * numberObstacles);
 
@@ -135,7 +136,7 @@ void Playground::SetEnvironment()
 	GoalPoint * tempGoal;
 
 	int agentX, agentY;
-	int agentWidth = 8;
+	int agentWidth = 5;
 	for(int loop1 = 0; loop1 < numberAgents; loop1++)
 	{
 		switch(loop1 % 4)

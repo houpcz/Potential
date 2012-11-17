@@ -46,7 +46,7 @@ void Agent::Tick(int millis)
 			wasPop = false;
 			waypoint = path.front();
 			float realPosDist = realPos.Distance(waypoint);
-			if(realPosDist < 3 || realPos.Distance(Point2D(goalX, goalY)) < 4 )
+			if(realPosDist < 3 || realPos.Distance(Point2D(goalX, goalY)) < 2 )
 			{
 				path.pop();
 				wasPop = true;
