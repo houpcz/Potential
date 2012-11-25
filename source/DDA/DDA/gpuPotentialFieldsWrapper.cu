@@ -112,11 +112,14 @@ void gpuCountPotentialFields(float *** potentialField, float * cpuFieldCenterX, 
 	cudaThreadSynchronize();
 
 	cudaMemcpy( cpuPotentialField, devPotentialField, memPotentialField, cudaMemcpyDeviceToHost ) ;
-
+	
+	// memcpy(potentialField, cpuPotentialField, memPotentialField);
+	
 	for(int loop1 = 0; loop1 < numberAgents; loop1++)
 		for(int loop2 = 0; loop2 < fieldWidth; loop2++)
 			for(int loop3 = 0; loop3 < fieldWidth; loop3++)
 				potentialField[loop1][loop2][loop3] = cpuPotentialField[loop1 * fieldWidth * fieldWidth + loop2 * fieldWidth + loop3];
+	
 }
 
 void gpuFreeMemory()
@@ -131,13 +134,56 @@ void gpuFreeMemory()
 
 #define MAX(a, b) (((a) > (b)) ? (a) : (b))
 
-__device__ bool pointTriangleTest(int x, int y, const Triangle & t)
+__device__ bool pointTriangleTest1(int x, int y, const Triangle & t)
 {
 	float ab = (t.p[0].x - x) * (t.p[1].y - y) - (t.p[1].x - x) * (t.p[0].y - y);
 	float bc = (t.p[1].x - x) * (t.p[2].y - y) - (t.p[2].x - x) * (t.p[1].y - y);
 	float ca = (t.p[2].x - x) * (t.p[0].y - y) - (t.p[0].x - x) * (t.p[2].y - y);
-	
-	return (ab <= 0.0f && bc <= 0.0f && ca <= 0.0f) || (ab >= 0.0f && bc >= 0.0f && ca >= 0.0f);
+
+	return ((ab <= 0.0f && bc <= 0.0f && ca <= 0.0f) || (ab >= 0.0f && bc >= 0.0f && ca >= 0.0f));
+}
+
+__device__ bool pointTriangleTest2(int x, int y, const Triangle & t)
+{
+	float p0x = t.p[0].x - x;
+	float p0y = t.p[0].y - y;
+	float p1x = t.p[1].x - x;
+	float p1y = t.p[1].y - y;
+	float p2x = t.p[2].x - x;
+	float p2y = t.p[2].y - y;
+	float ab = p0x * p1y - p1x * p0y;
+	float bc = p1x * p2y - p2x * p1y;
+	float ca = p2x * p0y - p0x * p2y;
+
+	return ((ab <= 0.0f && bc <= 0.0f && ca <= 0.0f) || (ab >= 0.0f && bc >= 0.0f && ca >= 0.0f));
+}
+
+__device__ bool pointTriangleTest3(int x, int y, const Triangle & t)
+{
+	float p0x = t.p[0].x - x;
+	float p0y = t.p[0].y - y;
+	float p1x = t.p[1].x - x;
+	float p1y = t.p[1].y - y;
+	if(p0x * p1y - p1x * p0y < 0.0f) // ab
+		return false;
+	float p2x = t.p[2].x - x;
+	float p2y = t.p[2].y - y;
+	float bc = p1x * p2y - p2x * p1y;
+	float ca = p2x * p0y - p0x * p2y;
+
+	return bc >= 0.0f && ca >= 0.0f;
+}
+
+__device__ bool pointTriangleTest(int x, int y, const Triangle & t)
+{
+	float p0x = t.p[0].x - x;
+	float p0y = t.p[0].y - y;
+	float p1x = t.p[1].x - x;
+	float p1y = t.p[1].y - y;
+	float p2x = t.p[2].x - x;
+	float p2y = t.p[2].y - y;
+
+	return (p0x * p1y - p1x * p0y) >= 0.0f && (p1x * p2y - p2x * p1y) >= 0.0f && (p2x * p0y - p0x * p2y) >= 0.0f;
 }
 
 __device__ float countFieldTile(int x, int y, int goalX, int goalY)
@@ -150,7 +196,6 @@ __device__ float countFieldTile(int x, int y, int goalX, int goalY)
 	int areaY = y - param[OBST_AREA_TOP];
 	float obst = 0.0f;
 
-	
 	if(areaX >= 0 && areaY >= 0 && 
 	   areaX < param[CELL_WIDTH] * AREA_CELL_WIDTH &&
 	   areaY < param[CELL_HEIGHT] * AREA_CELL_HEIGHT)
