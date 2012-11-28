@@ -4,10 +4,11 @@
 
 #define _GPU_
 
-PotentialFieldWorker::PotentialFieldWorker(vector<Agent *> *_agent, vector<Obstacle *> *_obstacle)
+PotentialFieldWorker::PotentialFieldWorker(vector<Agent *> *_agent, vector<Obstacle *> *_obstacle, bool _gpu)
 {
 	newFieldsPrepared = false;
 	lastTimeElapsed = 0;
+	gpu = _gpu;
 	agent = _agent;
 	obstacle = _obstacle;
 	agentSize = agent->size();
@@ -56,6 +57,7 @@ void PotentialFieldWorker::BuildSimpleQuadTree()
 	set<int> helpQuadTree[AREA_CELL_HEIGHT][AREA_CELL_WIDTH];
 
 	float x, y;
+
 	obstAreaLeft = (int) (*obstacle)[0]->polygon().at(0).x();
 	obstAreaRight = (int) (*obstacle)[0]->polygon().at(0).x() + 1;
 	obstAreaTop = (int) (*obstacle)[0]->polygon().at(0).y();
@@ -179,23 +181,25 @@ void PotentialFieldWorker::run()
 			goalY[loop1] = (*agent)[loop1]->GoalY();
 		}
 
-#ifndef _GPU_
-		for(int loop1 = 0; loop1 < agentSize; loop1++)
-		{
-			if(!shouldBeRunning)
-				break;
-			CountPotentialField(loop1);
+		
+		if(gpu)
+			gpuCountPotentialFields(manyPotentialFields, fieldCenterX, fieldCenterY, goalX, goalY);
+		else {
+			for(int loop1 = 0; loop1 < agentSize; loop1++)
+			{
+				if(!shouldBeRunning)
+					break;
+				CountPotentialField(loop1);
+			}
 		}
-#else
-		gpuCountPotentialFields(manyPotentialFields, fieldCenterX, fieldCenterY, goalX, goalY);
-#endif
+
 
 		qDebug("Elapsed time during counting %d p. fields = %dms", agentSize, time.elapsed());
 		lastTimeElapsed = time.elapsed();
 
 		newFieldsPrepared = true;
 		while(!requestForNewFields && shouldBeRunning)
-			this->msleep(10);
+			this->msleep(1);
 		requestForNewFields = false;
 		newFieldsPrepared = false;
 	}

@@ -1,3 +1,15 @@
+//----------------------------------------------------------------------------------------
+/**
+ * \file       gpuPotentialFieldsWrapper.h
+ * \author     Lukas Beran
+ * \date       2012/11/25
+ * \brief      Contains functions which uses GPU
+ *
+ *  Methods to allocate, free memory on gpu. For running kernel.
+ *
+*/
+//----------------------------------------------------------------------------------------
+
 #ifndef _GPUPOTENTIALFIELDSWRAPPER_H_
 #define _GPUPOTENTIALFIELDSWRAPPER_H_
 

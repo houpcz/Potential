@@ -3,11 +3,15 @@
 #include <math.h>
 #include "Playground.h"
 
-Playground::Playground(QWidget *parent, int _numberAgents, int _numberObstacles)
+Playground::Playground(QWidget *parent, int _numberAgents, int _numberObstacles, bool gpu)
      : QWidget(parent)
 {
 	numberAgents = _numberAgents;
 	numberObstacles = _numberObstacles;
+
+	if(numberObstacles > MAX_TRIANGLE)
+		numberObstacles = MAX_TRIANGLE;
+
 	countingTimeText = NULL;
 	SetEnvironment();
 	QGraphicsView * view = new QGraphicsView(&scene);
@@ -19,7 +23,7 @@ Playground::Playground(QWidget *parent, int _numberAgents, int _numberObstacles)
     connect(timer, SIGNAL(timeout()), this, SLOT(Tick()));
     timer->start(0);
 
-	worker = new PotentialFieldWorker(&agent, &obstacle);
+	worker = new PotentialFieldWorker(&agent, &obstacle, gpu);
 	worker->start();
 
 	time.start();
@@ -162,7 +166,7 @@ void Playground::SetEnvironment()
 
 		tempAgent = new Agent(agentX, agentY, agentWidth, agentWidth, 0);
 		tempAgent->SetGoal(470 - agentX, 470 - agentY);
-		tempGoal = new GoalPoint(470 - agentX, 470 - agentY, 10, 10, 0);
+		tempGoal = new GoalPoint(470 - agentX - 5, 470 - agentY - 5, 10, 10, 0);
 		tempField = new PotentialField(tempAgent, agentX, agentY, 0);
 
 		agent.push_back(tempAgent);

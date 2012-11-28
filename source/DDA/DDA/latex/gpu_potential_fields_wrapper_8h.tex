@@ -1,0 +1,32 @@
+\hypertarget{gpu_potential_fields_wrapper_8h}{\section{gpu\-Potential\-Fields\-Wrapper.\-h File Reference}
+\label{gpu_potential_fields_wrapper_8h}\index{gpu\-Potential\-Fields\-Wrapper.\-h@{gpu\-Potential\-Fields\-Wrapper.\-h}}
+}
+
+
+Contains functions which uses G\-P\-U.  
+
+
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{gpu_potential_fields_wrapper_8h_a3643ad8526895635ea96ac4b5a3eb25e}{void {\bfseries gpu\-Alloc\-Memory} (int \-\_\-number\-Agents, int \-\_\-field\-Width, int \-\_\-tile\-Width)}\label{gpu_potential_fields_wrapper_8h_a3643ad8526895635ea96ac4b5a3eb25e}
+
+\item 
+\hypertarget{gpu_potential_fields_wrapper_8h_afc95bcf008abc42530eba4b3a25b96e3}{void {\bfseries gpu\-Alloc\-Obstacles} (int \-\_\-obst\-Area\-Left, int \-\_\-obst\-Area\-Top, int \-\_\-cell\-Width, int \-\_\-cell\-Height, int $\ast$\-\_\-quad\-Tree, \hyperlink{struct_triangle}{Triangle} $\ast$\-\_\-triangle, int triangle\-Size, int $\ast$\-\_\-triangle\-I\-Ds, int triangle\-I\-Ds\-Size)}\label{gpu_potential_fields_wrapper_8h_afc95bcf008abc42530eba4b3a25b96e3}
+
+\item 
+\hypertarget{gpu_potential_fields_wrapper_8h_ab08fb7026f717d430230727e6975aec7}{void {\bfseries gpu\-Count\-Potential\-Fields} (float $\ast$$\ast$$\ast$potential\-Field, float $\ast$cpu\-Field\-Center\-X, float $\ast$cpu\-Field\-Center\-Y, int $\ast$cpu\-Goal\-X, int $\ast$cpu\-Goal\-Y)}\label{gpu_potential_fields_wrapper_8h_ab08fb7026f717d430230727e6975aec7}
+
+\item 
+\hypertarget{gpu_potential_fields_wrapper_8h_ae4922eb56808f109c5751ca771e84314}{void {\bfseries gpu\-Free\-Memory} ()}\label{gpu_potential_fields_wrapper_8h_ae4922eb56808f109c5751ca771e84314}
+
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Contains functions which uses G\-P\-U. \begin{DoxyAuthor}{Author}
+Lukas Beran 
+\end{DoxyAuthor}
+\begin{DoxyDate}{Date}
+2012/11/25 Methods to allocate, free memory on gpu. For running kernel. 
+\end{DoxyDate}

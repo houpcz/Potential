@@ -11,6 +11,7 @@ bool operator<(const BestFirstSearchNode & node1, const BestFirstSearchNode & no
 }
 
 int PotentialField::potentialFieldCount = 0;
+bool PotentialField::show1Field = false;
 
 PotentialField::PotentialField(Agent * _agent,  qreal x, qreal y, QGraphicsItem * parent) :  QGraphicsRectItem( x - (FIELD_WIDTH / 2) * TILE_WIDTH, y  - (FIELD_WIDTH / 2) * TILE_WIDTH, TILE_WIDTH * FIELD_WIDTH, TILE_WIDTH * FIELD_WIDTH, parent )
 {
@@ -30,7 +31,7 @@ PotentialField::~PotentialField(void)
 
 void PotentialField::paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget)
 {
-	if(fieldID != 0)
+	if(fieldID != 0 || !show1Field)
 		return;
 
 	float variance = maxValue - minValue;

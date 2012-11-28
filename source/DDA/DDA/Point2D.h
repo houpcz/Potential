@@ -1,11 +1,24 @@
-#pragma once
+//----------------------------------------------------------------------------------------
+/**
+ * \file       Point2D.h
+ * \author     Lukas Beran
+ * \date       2012/11/25
+ * \brief      Simple Point2D class.
+ *
+ *  2D point containing method Distance to another point and a few usefull methods.
+ *
+*/
+//----------------------------------------------------------------------------------------
+
+#ifndef _POINT2D_H_
+#define _POINT2D_H_
 
 class Point2D
 {
 private:
-	float length;
-	float x;
-	float y;
+	float length;		///< length of vector
+	float x;			///< x coord
+	float y;			///< y coord
 
 	void ComputeLength();
 public:
@@ -17,4 +30,6 @@ public:
 	float Distance(const Point2D & pointB);
 	void SetLength(float _length);
 };
+
+#endif
 

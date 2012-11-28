@@ -1,0 +1,111 @@
+\hypertarget{class_agent}{\section{Agent Class Reference}
+\label{class_agent}\index{Agent@{Agent}}
+}
+
+
+Class that holds info about an agent.  
+
+
+
+
+{\ttfamily \#include $<$Agent.\-h$>$}
+
+Inheritance diagram for Agent\-:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{class_agent}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{class_agent_ae94d885a5f3900b0b67927710945ba26}{Agent} (qreal x, qreal y, qreal width, qreal height, Q\-Graphics\-Item $\ast$parent=0)
+\begin{DoxyCompactList}\small\item\em Constructor. \end{DoxyCompactList}\item 
+\hypertarget{class_agent_affa8c88292795f1f07e7ac74ef50cb6f}{virtual void {\bfseries paint} (Q\-Painter $\ast$painter, const Q\-Style\-Option\-Graphics\-Item $\ast$option, Q\-Widget $\ast$widget=0)}\label{class_agent_affa8c88292795f1f07e7ac74ef50cb6f}
+
+\item 
+void \hyperlink{class_agent_a6a9ff6b09b8a66177a90f0172c72a884}{Tick} (int millis)
+\begin{DoxyCompactList}\small\item\em Tick. \end{DoxyCompactList}\item 
+\hypertarget{class_agent_af388a0b175ceda73e1834e399f6f98e9}{void {\bfseries Set\-Goal} (int \-\_\-goal\-X, int \-\_\-goal\-Y)}\label{class_agent_af388a0b175ceda73e1834e399f6f98e9}
+
+\item 
+\hypertarget{class_agent_a3037f3d0b54aaf8272c176c26d096c26}{int {\bfseries Goal\-X} ()}\label{class_agent_a3037f3d0b54aaf8272c176c26d096c26}
+
+\item 
+\hypertarget{class_agent_a0a87900958ea46f2e15df2c9f42e976e}{int {\bfseries Goal\-Y} ()}\label{class_agent_a0a87900958ea46f2e15df2c9f42e976e}
+
+\item 
+\hypertarget{class_agent_acfbcafe677bc8810fac4f8311e0d9c3f}{\hyperlink{class_point2_d}{Point2\-D} {\bfseries Real\-Pos} ()}\label{class_agent_acfbcafe677bc8810fac4f8311e0d9c3f}
+
+\item 
+\hypertarget{class_agent_ad886fc8c1e03592b23296cd82d8b0dbb}{\hyperlink{class_point2_d}{Point2\-D} {\bfseries Field\-Center} ()}\label{class_agent_ad886fc8c1e03592b23296cd82d8b0dbb}
+
+\item 
+\hypertarget{class_agent_a610a51c9fd807c1d75107409f1a6a8e0}{void {\bfseries Set\-Path} (stack$<$ \hyperlink{class_point2_d}{Point2\-D} $>$ $\ast$\-\_\-path)}\label{class_agent_a610a51c9fd807c1d75107409f1a6a8e0}
+
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Class that holds info about an agent. 
+
+This class contains information about the agen, i.\-e. its position, velocity, goal, current path. 
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{class_agent_ae94d885a5f3900b0b67927710945ba26}{\index{Agent@{Agent}!Agent@{Agent}}
+\index{Agent@{Agent}!Agent@{Agent}}
+\subsubsection[{Agent}]{\setlength{\rightskip}{0pt plus 5cm}Agent\-::\-Agent (
+\begin{DoxyParamCaption}
+\item[{qreal}]{x, }
+\item[{qreal}]{y, }
+\item[{qreal}]{width, }
+\item[{qreal}]{height, }
+\item[{Q\-Graphics\-Item $\ast$}]{parent = {\ttfamily 0}}
+\end{DoxyParamCaption}
+)}}\label{class_agent_ae94d885a5f3900b0b67927710945ba26}
+
+
+Constructor. 
+
+Creates a new agent with given position, width and height of ellipse.
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em x} & Origin x position \\
+\hline
+\mbox{\tt in}  & {\em y} & Origin y position \\
+\hline
+\mbox{\tt in}  & {\em width} & \hyperlink{class_agent}{Agent} width \\
+\hline
+\mbox{\tt in}  & {\em height} & \hyperlink{class_agent}{Agent} height \\
+\hline
+\mbox{\tt in}  & {\em parent} & possible Q\-Graphics\-Item parent \\
+\hline
+\end{DoxyParams}
+
+
+\subsection{Member Function Documentation}
+\hypertarget{class_agent_a6a9ff6b09b8a66177a90f0172c72a884}{\index{Agent@{Agent}!Tick@{Tick}}
+\index{Tick@{Tick}!Agent@{Agent}}
+\subsubsection[{Tick}]{\setlength{\rightskip}{0pt plus 5cm}void Agent\-::\-Tick (
+\begin{DoxyParamCaption}
+\item[{int}]{millis}
+\end{DoxyParamCaption}
+)}}\label{class_agent_a6a9ff6b09b8a66177a90f0172c72a884}
+
+
+Tick. 
+
+Updates agent position towards goal.
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em millis} & How many milliseconds lasted from last tick. \\
+\hline
+\end{DoxyParams}
+
+
+The documentation for this class was generated from the following files\-:\begin{DoxyCompactItemize}
+\item 
+\hyperlink{_agent_8h}{Agent.\-h}\item 
+Agent.\-cpp\end{DoxyCompactItemize}

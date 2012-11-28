@@ -1,4 +1,17 @@
-#pragma once
+//----------------------------------------------------------------------------------------
+/**
+ * \file       PotentialField.h
+ * \author     Lukas Beran
+ * \date       2012/11/25
+ * \brief      Contains PotentialField class
+ *
+ *  Potential field visualisation and method for finding path between agents and the global minimum in the field.
+ *
+*/
+//----------------------------------------------------------------------------------------
+
+#ifndef _POTENTIALFIELD_H_
+#define _POTENTIALFIELD_H_
 
 #include <QGraphicsRectItem>
 #include <stack>
@@ -23,20 +36,21 @@ private:
 	static const char DOWN_LEFT = '1';
 	static const char DOWN_CENTER = '2';
 	static const char DOWN_RIGHT = '3';
-	static int potentialFieldCount;
-	int fieldID;
+	static bool show1Field;					///< true if field number 1 should be visible
+	static int potentialFieldCount;			///< number of potential fields
+	int fieldID;							///< this field ID
 
-	Agent * agent;
-	int agentCenterX;
-	int agentCenterY;
-	qreal fieldCenterX;
-	qreal fieldCenterY;
-	float minValue;
-	float maxValue;
-	float potentialField[FIELD_WIDTH][FIELD_WIDTH];
-	char road[FIELD_WIDTH][FIELD_WIDTH];
+	Agent * agent;							///< pointer to agent whose the field this is
+	int agentCenterX;						///< agent pos x coord
+	int agentCenterY;						///< agent pos y coord
+	qreal fieldCenterX;						///< agent pos x coord when was the field counted
+	qreal fieldCenterY;						///< agent pos y coord when was the field counted
+	float minValue;							///< min value in field
+	float maxValue;							///< max value in the field
+	float potentialField[FIELD_WIDTH][FIELD_WIDTH];	///< the potential field itself
+	char road[FIELD_WIDTH][FIELD_WIDTH];	///< "pointers" to ancestors of all field tiles when finding path
 
-	stack<Point2D> path;
+	stack<Point2D> path;					///< path in road/potentialField
 
 	void PushToPath(int fieldIdX, int fieldIdY);
 	void FindPath();
@@ -47,5 +61,7 @@ public:
 	~PotentialField(void);
 	virtual void paint ( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget = 0 );
 	void SetPotentialField(float ** _potentialField, qreal _fieldCenterX, qreal _fieldCenterY);
+	static void SetShow1Field(bool show) { show1Field = show; };
 };
 
+#endif
