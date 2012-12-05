@@ -18,6 +18,7 @@
 #include <stack>
 #include "Point2D.h"
 
+class PotentialField;
 using namespace std;
 
 /// Class that holds info about an agent.
@@ -34,6 +35,7 @@ private:
 	int goalY;						///< Agent goal y position
 	Point2D velocity;				///< velocity vector
 	Point2D realPos;				///< position
+	PotentialField * field;			///< agents potential field
 	queue<Point2D> path;			///< waypoints of current path in queue
 public:
 	/// Constructor.
@@ -73,6 +75,7 @@ public:
 	Point2D RealPos() { return realPos; };
 	Point2D FieldCenter();
 	void SetPath(stack<Point2D> * _path);
+	void SetField(PotentialField * _field) { field = _field; };
 };
 
 #endif

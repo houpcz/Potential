@@ -7,10 +7,13 @@
 #include <device_launch_parameters.h>
 #include <device_functions.h>
 #include <math.h>
-
+#include <algorithm>
 #include "Triangle.h"
 
+#define OBSTACLE 100000.0f
+#define SMALL_OBSTACLE 10000.0f;
 __global__ void countFields(float * devPotentialField, int fieldWidth, int tileWidth, float * fieldCenterX, float * fieldCenterY, int * goalX, int * goalY);
+__global__ void smoothFields(float * devPotentialFieldIn, float *devPotentialFieldOut, int fieldWidth, int tileWidth);
 
 inline void
 check_cuda_errors (const char *filename, const int line_number)
@@ -50,7 +53,8 @@ __constant__ Triangle triangle[MAX_TRIANGLE];
 __constant__ int triangleIDs[MAX_TRIANGLE_IDS];
 
 float * cpuPotentialField;
-float * devPotentialField;
+float * devPotentialFieldIn;
+float * devPotentialFieldOut;
 float * devFieldCenterX;
 float * devFieldCenterY;
 int * devGoalX;
@@ -75,7 +79,8 @@ void gpuAllocMemory(int _numberAgents, int _fieldWidth, int _tileWidth)
 	memGoal = numberAgents * sizeof(int);
 
 	cpuPotentialField = (float *) malloc(memPotentialField);
-	cudaMalloc( (void**)&devPotentialField, memPotentialField);
+	cudaMalloc( (void**)&devPotentialFieldIn, memPotentialField);
+	cudaMalloc( (void**)&devPotentialFieldOut, memPotentialField);
 	cudaMalloc( (void**)&devFieldCenterX, memFieldCenter);
 	cudaMalloc( (void**)&devFieldCenterY, memFieldCenter);
 	cudaMalloc( (void**)&devGoalX, memGoal);
@@ -100,20 +105,19 @@ void gpuCountPotentialFields(float *** potentialField, float * cpuFieldCenterX, 
 {
 	// grid configuration1
     dim3 gridRes(numberAgents, 1, 1);
-    dim3 blockRes(fieldWidth / 4, fieldWidth / 4, 1);
+    dim3 blockRes(fieldWidth / 2, fieldWidth / 2, 1);
 
 	cudaMemcpy( devFieldCenterX, cpuFieldCenterX, memFieldCenter, cudaMemcpyHostToDevice ) ;
 	cudaMemcpy( devFieldCenterY, cpuFieldCenterY, memFieldCenter, cudaMemcpyHostToDevice ) ;
 	cudaMemcpy( devGoalX, cpuGoalX, memGoal, cudaMemcpyHostToDevice ) ;
 	cudaMemcpy( devGoalY, cpuGoalY, memGoal, cudaMemcpyHostToDevice ) ;
 
-    countFields<<< gridRes, blockRes >>>( devPotentialField, fieldWidth, tileWidth, devFieldCenterX, devFieldCenterY, devGoalX, devGoalY);
+    countFields<<< gridRes, blockRes >>>( devPotentialFieldIn, fieldWidth, tileWidth, devFieldCenterX, devFieldCenterY, devGoalX, devGoalY);
 	CHECK_ERROR( cudaGetLastError() );
 	cudaThreadSynchronize();
-
-	cudaMemcpy( cpuPotentialField, devPotentialField, memPotentialField, cudaMemcpyDeviceToHost ) ;
-	
-	// memcpy(potentialField, cpuPotentialField, memPotentialField);
+	smoothFields<<< gridRes, blockRes >>> (devPotentialFieldIn, devPotentialFieldOut, fieldWidth, tileWidth);
+	cudaMemcpy( cpuPotentialField, devPotentialFieldOut, memPotentialField, cudaMemcpyDeviceToHost ) ;
+	//cudaMemcpy( cpuPotentialField, devPotentialFieldIn, memPotentialField, cudaMemcpyDeviceToHost ) ;
 	
 	for(int loop1 = 0; loop1 < numberAgents; loop1++)
 		for(int loop2 = 0; loop2 < fieldWidth; loop2++)
@@ -125,7 +129,8 @@ void gpuCountPotentialFields(float *** potentialField, float * cpuFieldCenterX, 
 void gpuFreeMemory()
 {
 	free(cpuPotentialField);
-	cudaFree(devPotentialField);
+	cudaFree(devPotentialFieldIn);
+	cudaFree(devPotentialFieldOut);
 	cudaFree(devFieldCenterX);
 	cudaFree(devFieldCenterY);
 	cudaFree(devGoalX);
@@ -212,9 +217,10 @@ __device__ float countFieldTile(int x, int y, int goalX, int goalY)
 
 		for(int loop1 = startX; loop1 < endX; loop1++)
 		{
-			if(pointTriangleTest(x, y, triangle[triangleIDs[loop1]]))
+			int triangleID = triangleIDs[loop1];
+			if(pointTriangleTest(x, y, triangle[triangleID]))
 			{
-				obst = 10000.0f;
+				obst = OBSTACLE;
 				break;
 			}
 		}
@@ -241,6 +247,36 @@ __global__ void countFields(float * devPotentialField, int fieldWidth, int tileW
 			x = (int) fieldCenterX[fieldID] + (loop2 - (fieldWidth / 2)) * tileWidth; 
 			y = (int) fieldCenterY[fieldID] + (loop1 - (fieldWidth / 2)) * tileWidth;
 			devPotentialField[fieldID * fieldWidth * fieldWidth + loop1 * fieldWidth + loop2] = countFieldTile(x, y, goalX[fieldID], goalY[fieldID]);
+		}
+	}
+}
+
+__global__ void smoothFields(float * devPotentialFieldIn, float *devPotentialFieldOut, int fieldWidth, int tileWidth)
+{
+	int fieldID = blockIdx.x;
+	int threadX = threadIdx.x;
+	int threadY = threadIdx.y;
+	int myWorkFieldWidth = fieldWidth / blockDim.x;
+	int myWorkFieldHeight = fieldWidth / blockDim.y;
+	int endWorkX = MAX((threadX + 1) * myWorkFieldWidth, fieldWidth);
+	int endWorkY = MAX((threadY + 1) * myWorkFieldHeight, fieldWidth);
+	int arrayID;
+	int fieldOffset = fieldID * fieldWidth * fieldWidth;
+	for(int loop1 = threadY * myWorkFieldWidth; loop1 < endWorkY; loop1++)
+	{
+		for(int loop2 = threadX * myWorkFieldWidth; loop2 < endWorkX; loop2++)
+		{
+			arrayID = fieldOffset + loop1 * fieldWidth + loop2;
+			if((loop2 > 0 && devPotentialFieldOut[arrayID - 1] > OBSTACLE) ||
+			   (loop2 < fieldWidth - 1 && devPotentialFieldOut[arrayID + 1] > OBSTACLE) ||
+			   (loop1 > 0 && devPotentialFieldOut[arrayID - fieldWidth] > OBSTACLE) ||
+			   (loop1 < fieldWidth - 1 && devPotentialFieldOut[arrayID + fieldWidth] > OBSTACLE)) 
+			{
+				devPotentialFieldOut[arrayID] = devPotentialFieldIn[arrayID] + SMALL_OBSTACLE;
+			} else 
+			{
+				devPotentialFieldOut[arrayID] = devPotentialFieldIn[arrayID];
+			}
 		}
 	}
 }

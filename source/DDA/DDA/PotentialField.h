@@ -21,10 +21,8 @@
 class PotentialField : public QGraphicsRectItem
 {
 public :
-	static const int FIELD_WIDTH = 64;
-	static const int TILE_WIDTH = 4;
-	static const int OBSTACLE = 100000;
-private:
+	static const int OBSTACLE_IN_FIELD = 100000;
+private:	
 	static const char ON_ROAD = 'R';
 	static const char START = - 'S';
 	static const char NO_DIR = '?';
@@ -36,6 +34,8 @@ private:
 	static const char DOWN_LEFT = '1';
 	static const char DOWN_CENTER = '2';
 	static const char DOWN_RIGHT = '3';
+	static int fieldWidth;
+	static int tileWidth;
 	static bool show1Field;					///< true if field number 1 should be visible
 	static int potentialFieldCount;			///< number of potential fields
 	int fieldID;							///< this field ID
@@ -49,11 +49,10 @@ private:
 	float maxValue;							///< max value in the field
 	float potentialField[FIELD_WIDTH][FIELD_WIDTH];	///< the potential field itself
 	char road[FIELD_WIDTH][FIELD_WIDTH];	///< "pointers" to ancestors of all field tiles when finding path
-
+	bool fieldPrepared;
 	stack<Point2D> path;					///< path in road/potentialField
 
 	void PushToPath(int fieldIdX, int fieldIdY);
-	void FindPath();
 
 	QTime * time;
 public:
@@ -62,6 +61,7 @@ public:
 	virtual void paint ( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget = 0 );
 	void SetPotentialField(float ** _potentialField, qreal _fieldCenterX, qreal _fieldCenterY);
 	static void SetShow1Field(bool show) { show1Field = show; };
+	void FindPath();
 };
 
 #endif

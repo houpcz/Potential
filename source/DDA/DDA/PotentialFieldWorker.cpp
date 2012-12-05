@@ -245,26 +245,26 @@ float PotentialFieldWorker::CountPotentialFieldTilePostProcess(int row, int col,
 	int n = 0;
 	if(row > 0)
 	{
-		if(potentialField[row - 1][col] > PotentialField::OBSTACLE)
+		if(potentialField[row - 1][col] > PotentialField::OBSTACLE_IN_FIELD)
 			++n;
 	}
 	if(col > 0)
 	{
-		if(potentialField[row][col - 1] > PotentialField::OBSTACLE)
+		if(potentialField[row][col - 1] > PotentialField::OBSTACLE_IN_FIELD)
 			++n;
 	}
 	if(row < PotentialField::FIELD_WIDTH - 1)
 	{
-		if(potentialField[row + 1][col] > PotentialField::OBSTACLE)
+		if(potentialField[row + 1][col] > PotentialField::OBSTACLE_IN_FIELD)
 			++n;
 	}
 	if(col < PotentialField::FIELD_WIDTH - 1)
 	{
-		if(potentialField[row][col + 1] > PotentialField::OBSTACLE)
+		if(potentialField[row][col + 1] > PotentialField::OBSTACLE_IN_FIELD)
 			++n;
 	}
 
-	return (n > 0) ? PotentialField::OBSTACLE / 100: 0.0f;
+	return (n > 0) ? PotentialField::OBSTACLE_IN_FIELD / 100: 0.0f;
 }
 
 float PotentialFieldWorker::CountPotentialFieldTile(int agentID, int x, int y, int goalX, int goalY)
@@ -304,7 +304,7 @@ float PotentialFieldWorker::CountPotentialFieldTile(int agentID, int x, int y, i
 		}
 	}
 
-	float obst = inTriangle ? PotentialField::OBSTACLE : 0;
+	float obst = inTriangle ? PotentialField::OBSTACLE_IN_FIELD : 0;
 	
 	return initValue + obst;
 }

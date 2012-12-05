@@ -37,6 +37,9 @@ void Agent::Tick(int millis)
 
 	realPos.Set(x() + rect().x(), y() + rect().y());
 
+	if(path.empty())
+		field->FindPath();
+
 	if(!path.empty())
 	{
 		Point2D waypoint(0, 0);

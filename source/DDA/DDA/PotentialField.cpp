@@ -20,6 +20,7 @@ PotentialField::PotentialField(Agent * _agent,  qreal x, qreal y, QGraphicsItem 
 	fieldCenterX = 0.0f;
 	fieldCenterY = 0.0f;
 	time = NULL;
+	fieldPrepared = false;
 }
 
 
@@ -51,10 +52,10 @@ void PotentialField::paint( QPainter * painter, const QStyleOptionGraphicsItem *
 			if(value > 255)
 				value = 255;
 
-			if(road[loop1][loop2] == ON_ROAD)
-				brush.setColor(QColor(0, 255, 0));
-			else
-				brush.setColor(QColor(255 - value, 0, 255 - value));
+			//if(road[loop1][loop2] == ON_ROAD)
+			//	brush.setColor(QColor(0, 255, 0));
+			//else
+			brush.setColor(QColor(255 - value, 0, 255 - value));
 
 			painter->setBrush(brush);
 			painter->drawRect(tileX, tileY, TILE_WIDTH, TILE_WIDTH);
@@ -82,18 +83,21 @@ void PotentialField::SetPotentialField(float ** _potentialField, qreal _fieldCen
 			potentialField[loop1][loop2] = _potentialField[loop1][loop2];
 			if(potentialField[loop1][loop2] < minValue)
 				minValue = potentialField[loop1][loop2];
-			else if(potentialField[loop1][loop2] > maxValue && potentialField[loop1][loop2] < OBSTACLE / 100)
+			else if(potentialField[loop1][loop2] > maxValue && potentialField[loop1][loop2] < OBSTACLE_IN_FIELD / 100)
 				maxValue= potentialField[loop1][loop2];
 		}
 	}
 	
 	setRect(fieldCenterX, fieldCenterY, rect().width(), rect().height());
 
-	FindPath();
+	fieldPrepared = true;
 }
 
 void PotentialField::FindPath()
 {
+	if(!fieldPrepared)
+		return;
+
 	int centerX = agentCenterX;
 	int centerY = agentCenterY;
 	int minCenter;

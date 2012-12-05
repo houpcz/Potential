@@ -168,6 +168,7 @@ void Playground::SetEnvironment()
 		tempAgent->SetGoal(470 - agentX, 470 - agentY);
 		tempGoal = new GoalPoint(470 - agentX - 5, 470 - agentY - 5, 10, 10, 0);
 		tempField = new PotentialField(tempAgent, agentX, agentY, 0);
+		tempAgent->SetField(tempField);
 
 		agent.push_back(tempAgent);
 		scene.addItem(tempAgent);
