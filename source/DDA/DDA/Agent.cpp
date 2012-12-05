@@ -92,8 +92,8 @@ Point2D Agent::FieldCenter()
 {
 	float fieldCenterX = rect().x() + pos().x() + rect().width()/2;
 	float fieldCenterY = rect().y() + pos().y() + rect().height()/2;
-	fieldCenterX = fieldCenterX - fmod(fieldCenterX, PotentialField::TILE_WIDTH);
-	fieldCenterY = fieldCenterY - fmod(fieldCenterY, PotentialField::TILE_WIDTH);
+	fieldCenterX = fieldCenterX - fmod(fieldCenterX, PotentialField::TileWidth());
+	fieldCenterY = fieldCenterY - fmod(fieldCenterY, PotentialField::TileWidth());
 
 	return Point2D(fieldCenterX, fieldCenterY);
 }

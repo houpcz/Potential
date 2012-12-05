@@ -4,6 +4,9 @@
 
 #define _GPU_
 
+int PotentialFieldWorker::threadBlockHeight = 16;
+int PotentialFieldWorker::threadBlockWidth = 16;
+
 PotentialFieldWorker::PotentialFieldWorker(vector<Agent *> *_agent, vector<Obstacle *> *_obstacle, bool _gpu)
 {
 	newFieldsPrepared = false;
@@ -21,13 +24,13 @@ PotentialFieldWorker::~PotentialFieldWorker(void)
 	{
 		for(int loop2 = 0; loop2 < agentSize; loop2++)
 		{
-			for(int loop1 = 0; loop1 < PotentialField::FIELD_WIDTH; loop1++)
+			for(int loop1 = 0; loop1 < PotentialField::FieldWidth(); loop1++)
 				delete [] manyPotentialFields[loop2][loop1];
 
 			delete [] manyPotentialFields[loop2];
 		}
 
-		for(int loop1 = 0; loop1 < PotentialField::FIELD_WIDTH; loop1++)
+		for(int loop1 = 0; loop1 < PotentialField::FieldWidth(); loop1++)
 			delete tempField[loop1];
 		delete [] tempField;
 			
@@ -147,15 +150,15 @@ void PotentialFieldWorker::run()
 
 	BuildSimpleQuadTree();
 
-	tempField = new float*[PotentialField::FIELD_WIDTH];
-	for(int loop1 = 0; loop1 < PotentialField::FIELD_WIDTH; loop1++)
-		tempField[loop1] = new float[PotentialField::FIELD_WIDTH];
+	tempField = new float*[PotentialField::FieldWidth()];
+	for(int loop1 = 0; loop1 < PotentialField::FieldWidth(); loop1++)
+		tempField[loop1] = new float[PotentialField::FieldWidth()];
 
 	for(int loop2 = 0; loop2 < agentSize; loop2++)
 	{
-		manyPotentialFields[loop2] = new float*[PotentialField::FIELD_WIDTH];
-		for(int loop1 = 0; loop1 < PotentialField::FIELD_WIDTH; loop1++)
-			manyPotentialFields[loop2][loop1] = new float[PotentialField::FIELD_WIDTH];
+		manyPotentialFields[loop2] = new float*[PotentialField::FieldWidth()];
+		for(int loop1 = 0; loop1 < PotentialField::FieldWidth(); loop1++)
+			manyPotentialFields[loop2][loop1] = new float[PotentialField::FieldWidth()];
 	}
 
 	newFieldsPrepared = false;
@@ -163,7 +166,7 @@ void PotentialFieldWorker::run()
 	shouldBeRunning = true;
 	requestForNewFields = false;
 
-	gpuAllocMemory(agentSize, PotentialField::FIELD_WIDTH, PotentialField::TILE_WIDTH);
+	gpuAllocMemory(agentSize, PotentialField::FieldWidth(), PotentialField::TileWidth());
 
 	lastTimeElapsed = 0;
 
@@ -183,7 +186,7 @@ void PotentialFieldWorker::run()
 
 		
 		if(gpu)
-			gpuCountPotentialFields(manyPotentialFields, fieldCenterX, fieldCenterY, goalX, goalY);
+			gpuCountPotentialFields(manyPotentialFields, threadBlockWidth, threadBlockHeight, fieldCenterX, fieldCenterY, goalX, goalY);
 		else {
 			for(int loop1 = 0; loop1 < agentSize; loop1++)
 			{
@@ -218,12 +221,12 @@ void PotentialFieldWorker::CountPotentialField(int agentID)
 	int gX = goalX[agentID];
 	int gY = goalY[agentID];
 
-	for(int loop1 = 0; loop1 < PotentialField::FIELD_WIDTH; loop1++)
+	for(int loop1 = 0; loop1 < PotentialField::FieldWidth(); loop1++)
 	{
-		for(int loop2 = 0; loop2 < PotentialField::FIELD_WIDTH; loop2++)
+		for(int loop2 = 0; loop2 < PotentialField::FieldWidth(); loop2++)
 		{
-			x = (int) fieldCenterX[agentID] + (loop2 - (PotentialField::FIELD_WIDTH / 2)) * PotentialField::TILE_WIDTH;
-			y = (int) fieldCenterY[agentID] + (loop1 - (PotentialField::FIELD_WIDTH / 2)) * PotentialField::TILE_WIDTH;
+			x = (int) fieldCenterX[agentID] + (loop2 - (PotentialField::FieldWidth() / 2)) * PotentialField::TileWidth();
+			y = (int) fieldCenterY[agentID] + (loop1 - (PotentialField::FieldWidth() / 2)) * PotentialField::TileWidth();
 			tempField[loop1][loop2] = CountPotentialFieldTile(agentID, x, y, gX, gY);
 		}
 	}
@@ -231,9 +234,9 @@ void PotentialFieldWorker::CountPotentialField(int agentID)
 		return;
 
 	
-	for(int loop1 = 0; loop1 < PotentialField::FIELD_WIDTH; loop1++)
+	for(int loop1 = 0; loop1 < PotentialField::FieldWidth(); loop1++)
 	{
-		for(int loop2 = 0; loop2 < PotentialField::FIELD_WIDTH; loop2++)
+		for(int loop2 = 0; loop2 < PotentialField::FieldWidth(); loop2++)
 		{
 			manyPotentialFields[agentID][loop1][loop2] = tempField[loop1][loop2] + CountPotentialFieldTilePostProcess(loop1, loop2, tempField);
 		}
@@ -253,12 +256,12 @@ float PotentialFieldWorker::CountPotentialFieldTilePostProcess(int row, int col,
 		if(potentialField[row][col - 1] > PotentialField::OBSTACLE_IN_FIELD)
 			++n;
 	}
-	if(row < PotentialField::FIELD_WIDTH - 1)
+	if(row < PotentialField::FieldWidth() - 1)
 	{
 		if(potentialField[row + 1][col] > PotentialField::OBSTACLE_IN_FIELD)
 			++n;
 	}
-	if(col < PotentialField::FIELD_WIDTH - 1)
+	if(col < PotentialField::FieldWidth() - 1)
 	{
 		if(potentialField[row][col + 1] > PotentialField::OBSTACLE_IN_FIELD)
 			++n;

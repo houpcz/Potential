@@ -47,8 +47,8 @@ private:
 	qreal fieldCenterY;						///< agent pos y coord when was the field counted
 	float minValue;							///< min value in field
 	float maxValue;							///< max value in the field
-	float potentialField[FIELD_WIDTH][FIELD_WIDTH];	///< the potential field itself
-	char road[FIELD_WIDTH][FIELD_WIDTH];	///< "pointers" to ancestors of all field tiles when finding path
+	float ** potentialField;				///< the potential field itself
+	char ** road;							///< "pointers" to ancestors of all field tiles when finding path
 	bool fieldPrepared;
 	stack<Point2D> path;					///< path in road/potentialField
 
@@ -62,6 +62,10 @@ public:
 	void SetPotentialField(float ** _potentialField, qreal _fieldCenterX, qreal _fieldCenterY);
 	static void SetShow1Field(bool show) { show1Field = show; };
 	void FindPath();
+	static void SetFieldWidth(int _fieldWidth) { fieldWidth = _fieldWidth; }
+	static void SetTileWidth(int _tileWidth) { tileWidth = _tileWidth; }
+	static int FieldWidth() { return fieldWidth; }
+	static int TileWidth() { return tileWidth; }
 };
 
 #endif

@@ -28,6 +28,8 @@ private:
 	vector<Agent *> *agent;		///< pointers to all agents
 	vector<Obstacle *> *obstacle; ///< pointers to all obstacles
 
+	static int threadBlockWidth;
+	static int threadBlockHeight;
 	int obstAreaTop;		///< top y coord of  bounding box of all triangles
 	int obstAreaBottom;	    ///< bottom y coord of bounding box of all triangles
 	int obstAreaRight;		///< right x coord of bounding box of all triangles
@@ -71,6 +73,8 @@ public:
 	bool GetNewFieldsPrepared() { return newFieldsPrepared; }
 	int GetLastTimeElapsedMS() { return lastTimeElapsed; }
 	void RequestForNewFields() { newFieldsPrepared = false; requestForNewFields = true; }
+	static void SetThreadBlockWidth(int width) { threadBlockWidth = width; }
+	static void SetThreadBlockHeight(int height) { threadBlockHeight = height; }
     void run();
 };
 

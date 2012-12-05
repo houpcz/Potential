@@ -10,10 +10,12 @@ bool operator<(const BestFirstSearchNode & node1, const BestFirstSearchNode & no
 	return node1.value > node2.value;
 }
 
+int PotentialField::tileWidth = 4;
+int PotentialField::fieldWidth = 32;
 int PotentialField::potentialFieldCount = 0;
 bool PotentialField::show1Field = false;
 
-PotentialField::PotentialField(Agent * _agent,  qreal x, qreal y, QGraphicsItem * parent) :  QGraphicsRectItem( x - (FIELD_WIDTH / 2) * TILE_WIDTH, y  - (FIELD_WIDTH / 2) * TILE_WIDTH, TILE_WIDTH * FIELD_WIDTH, TILE_WIDTH * FIELD_WIDTH, parent )
+PotentialField::PotentialField(Agent * _agent,  qreal x, qreal y, QGraphicsItem * parent) :  QGraphicsRectItem( x - (fieldWidth / 2) * tileWidth, y  - (fieldWidth / 2) * tileWidth, tileWidth * fieldWidth, tileWidth * fieldWidth, parent )
 {
 	agent = _agent;
 	fieldID = potentialFieldCount++;
@@ -21,6 +23,13 @@ PotentialField::PotentialField(Agent * _agent,  qreal x, qreal y, QGraphicsItem 
 	fieldCenterY = 0.0f;
 	time = NULL;
 	fieldPrepared = false;
+	potentialField = new float*[fieldWidth];
+	road = new char*[fieldWidth];
+	for(int loop1 = 0; loop1 < fieldWidth; loop1++)
+	{
+		potentialField[loop1] = new float[fieldWidth];
+		road[loop1] = new char[fieldWidth];
+	}
 }
 
 
@@ -28,6 +37,14 @@ PotentialField::~PotentialField(void)
 {
 	if(time != NULL)
 		delete time;
+
+	for(int loop1 = 0; loop1 < fieldWidth; loop1++)
+	{
+		delete [] potentialField[loop1];
+		delete [] road[loop1];
+	}
+	delete [] potentialField;
+	delete [] road;
 }
 
 void PotentialField::paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget)
@@ -42,12 +59,12 @@ void PotentialField::paint( QPainter * painter, const QStyleOptionGraphicsItem *
 	QBrush brush;
 	brush.setStyle(Qt::BrushStyle::SolidPattern);
 
-	for(int loop1 = 0; loop1 < FIELD_WIDTH; loop1++)
+	for(int loop1 = 0; loop1 < fieldWidth; loop1++)
 	{
-		for(int loop2 = 0; loop2 < FIELD_WIDTH; loop2++)
+		for(int loop2 = 0; loop2 < fieldWidth; loop2++)
 		{
-			int tileX = (int) fieldCenterX + loop2 * TILE_WIDTH;
-			int tileY = (int) fieldCenterY + loop1 * TILE_WIDTH;
+			int tileX = (int) fieldCenterX + loop2 * tileWidth;
+			int tileY = (int) fieldCenterY + loop1 * tileWidth;
 			int value = ((int) (235 * (potentialField[loop1][loop2] - minValue) / variance) + 20);		
 			if(value > 255)
 				value = 255;
@@ -58,27 +75,27 @@ void PotentialField::paint( QPainter * painter, const QStyleOptionGraphicsItem *
 			brush.setColor(QColor(255 - value, 0, 255 - value));
 
 			painter->setBrush(brush);
-			painter->drawRect(tileX, tileY, TILE_WIDTH, TILE_WIDTH);
+			painter->drawRect(tileX, tileY, tileWidth, tileWidth);
 		}
 	}
 }
 
 void PotentialField::SetPotentialField(float ** _potentialField, qreal _fieldCenterX, qreal _fieldCenterY)
 {
-	fieldCenterX = _fieldCenterX - (FIELD_WIDTH / 2) * TILE_WIDTH;
-	fieldCenterY = _fieldCenterY - (FIELD_WIDTH / 2) * TILE_WIDTH;
+	fieldCenterX = _fieldCenterX - (fieldWidth / 2) * tileWidth;
+	fieldCenterY = _fieldCenterY - (fieldWidth / 2) * tileWidth;
 
 	Point2D fieldCenter = agent->FieldCenter();
-	int plusX = (fieldCenter.X() - _fieldCenterX) / TILE_WIDTH;
-	int plusY = (fieldCenter.Y() - _fieldCenterY) / TILE_WIDTH;
-	agentCenterX = FIELD_WIDTH / 2 + plusX;
-	agentCenterY = FIELD_WIDTH / 2 + plusY;
+	int plusX = (fieldCenter.X() - _fieldCenterX) / tileWidth;
+	int plusY = (fieldCenter.Y() - _fieldCenterY) / tileWidth;
+	agentCenterX = fieldWidth / 2 + plusX;
+	agentCenterY = fieldWidth / 2 + plusY;
 
 	maxValue = -1;
 	minValue = potentialField[0][0];
-	for(int loop1 = 0; loop1 < FIELD_WIDTH; loop1++)
+	for(int loop1 = 0; loop1 < fieldWidth; loop1++)
 	{
-		for(int loop2 = 0; loop2 < FIELD_WIDTH; loop2++)
+		for(int loop2 = 0; loop2 < fieldWidth; loop2++)
 		{
 			potentialField[loop1][loop2] = _potentialField[loop1][loop2];
 			if(potentialField[loop1][loop2] < minValue)
@@ -129,9 +146,9 @@ void PotentialField::FindPath()
 	queueField.push(BestFirstSearchNode(minX, minY, minCenter));
 	BestFirstSearchNode tempNode(0, 0, 0);
 	/* CLOSE SEZNAM */
-	for(int loop1 = 0; loop1 < FIELD_WIDTH; loop1++)
+	for(int loop1 = 0; loop1 < fieldWidth; loop1++)
 	{
-		for(int loop2 = 0; loop2 < FIELD_WIDTH; loop2++)
+		for(int loop2 = 0; loop2 < fieldWidth; loop2++)
 		{
 			road[loop1][loop2] = NO_DIR;
 		}
@@ -165,7 +182,7 @@ void PotentialField::FindPath()
 			queueField.push(BestFirstSearchNode(minX, minY, minCenter));
 			road[minY][minX] = UP_CENTER;
 		}
-		if(lastMinY < FIELD_WIDTH - 1 && road[lastMinY + 1][lastMinX] == NO_DIR) 
+		if(lastMinY < fieldWidth - 1 && road[lastMinY + 1][lastMinX] == NO_DIR) 
 		{
 			minX = lastMinX;
 			minY = lastMinY + 1;
@@ -181,7 +198,7 @@ void PotentialField::FindPath()
 			queueField.push(BestFirstSearchNode(minX, minY, minCenter));
 			road[minY][minX] = LEFT;
 		}
-		if(lastMinX < FIELD_WIDTH - 1 && road[lastMinY][lastMinX + 1] == NO_DIR) 
+		if(lastMinX < fieldWidth - 1 && road[lastMinY][lastMinX + 1] == NO_DIR) 
 		{
 			minX = lastMinX + 1;
 			minY = lastMinY;
@@ -197,7 +214,7 @@ void PotentialField::FindPath()
 			queueField.push(BestFirstSearchNode(minX, minY, minCenter));
 			road[minY][minX] = UP_LEFT;
 		}
-		if(lastMinY < FIELD_WIDTH - 1 && lastMinX < FIELD_WIDTH - 1  && road[lastMinY + 1][lastMinX + 1] == NO_DIR) 
+		if(lastMinY < fieldWidth - 1 && lastMinX < fieldWidth - 1  && road[lastMinY + 1][lastMinX + 1] == NO_DIR) 
 		{
 			minX = lastMinX + 1;
 			minY = lastMinY + 1;
@@ -205,7 +222,7 @@ void PotentialField::FindPath()
 			queueField.push(BestFirstSearchNode(minX, minY, minCenter));
 			road[minY][minX] = DOWN_RIGHT;
 		}
-		if(lastMinX > 0 && lastMinY < FIELD_WIDTH - 1  && road[lastMinY + 1][lastMinX - 1] == NO_DIR) 
+		if(lastMinX > 0 && lastMinY < fieldWidth - 1  && road[lastMinY + 1][lastMinX - 1] == NO_DIR) 
 		{
 			minX = lastMinX - 1;
 			minY = lastMinY + 1;
@@ -213,7 +230,7 @@ void PotentialField::FindPath()
 			queueField.push(BestFirstSearchNode(minX, minY, minCenter));
 			road[minY][minX] = DOWN_LEFT;
 		}
-		if(lastMinX < FIELD_WIDTH - 1 && lastMinY > 0 && road[lastMinY - 1][lastMinX + 1] == NO_DIR) 
+		if(lastMinX < fieldWidth - 1 && lastMinY > 0 && road[lastMinY - 1][lastMinX + 1] == NO_DIR) 
 		{
 			minX = lastMinX + 1;
 			minY = lastMinY - 1;
@@ -279,5 +296,5 @@ void PotentialField::FindPath()
 
 void PotentialField::PushToPath(int fieldIdX, int fieldIdY)
 {
-	path.push(Point2D(fieldIdX * TILE_WIDTH + fieldCenterX, fieldIdY * TILE_WIDTH + fieldCenterY));
+	path.push(Point2D(fieldIdX * tileWidth + fieldCenterX, fieldIdY * tileWidth + fieldCenterY));
 }

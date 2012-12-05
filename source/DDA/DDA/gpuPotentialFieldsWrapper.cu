@@ -101,11 +101,11 @@ void gpuAllocObstacles(int _obstAreaLeft, int _obstAreaTop, int _cellWidth, int 
 	cudaMemcpyToSymbol((const char *) triangleIDs, _triangleIDs, sizeof(int) * triangleIDsSize) ;
 }
 
-void gpuCountPotentialFields(float *** potentialField, float * cpuFieldCenterX, float * cpuFieldCenterY, int * cpuGoalX, int * cpuGoalY)
+void gpuCountPotentialFields(float *** potentialField, int threadBlockWidth, int threadBlockHeight, float * cpuFieldCenterX, float * cpuFieldCenterY, int * cpuGoalX, int * cpuGoalY)
 {
 	// grid configuration1
     dim3 gridRes(numberAgents, 1, 1);
-    dim3 blockRes(fieldWidth / 2, fieldWidth / 2, 1);
+    dim3 blockRes(threadBlockHeight, threadBlockWidth, 1);
 
 	cudaMemcpy( devFieldCenterX, cpuFieldCenterX, memFieldCenter, cudaMemcpyHostToDevice ) ;
 	cudaMemcpy( devFieldCenterY, cpuFieldCenterY, memFieldCenter, cudaMemcpyHostToDevice ) ;
